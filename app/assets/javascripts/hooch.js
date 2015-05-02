@@ -1,3 +1,69 @@
+/* Simple JavaScript Inheritance
+ * By John Resig http://ejohn.org/
+ * MIT Licensed.
+ */
+// Inspired by base2 and Prototype
+(function(){
+  var initializing = false, fnTest = /xyz/.test(function(){xyz;}) ? /\b_super\b/ : /.*/;
+  // The base Class implementation (does nothing)
+  this.Class = function(){};
+
+  // Create a new Class that inherits from this class
+  Class.extend = function(prop) {
+    var _super = this.prototype;
+
+    // Instantiate a base class (but only create the instance,
+    // don't run the init constructor)
+    initializing = true;
+    var prototype = new this();
+    initializing = false;
+
+    // Copy the properties over onto the new prototype
+    for (var name in prop) {
+      // Check if we're overwriting an existing function
+      prototype[name] = typeof prop[name] == "function" &&
+        typeof _super[name] == "function" && fnTest.test(prop[name]) ?
+        (function(name, fn){
+          return function() {
+            var tmp = this._super;
+
+            // Add a new ._super() method that is the same method
+            // but on the super-class
+            this._super = _super[name];
+
+            // The method only need to be bound temporarily, so we
+            // remove it when we're done executing
+            var ret = fn.apply(this, arguments);
+            this._super = tmp;
+
+            return ret;
+          };
+        })(name, prop[name]) :
+        prop[name];
+    }
+
+    // The dummy class constructor
+    function Class() {
+      // All construction is actually done in the init method
+      if ( !initializing && this.init )
+        this.init.apply(this, arguments);
+    }
+
+    // Populate our constructed prototype object
+    Class.prototype = prototype;
+
+    // Enforce the constructor to be what we expect
+    Class.prototype.constructor = Class;
+
+    // And make this class extendable
+    Class.extend = arguments.callee;
+
+    return Class;
+  };
+})();
+/*End Simple Inheritance*/
+
+/*Begin Hooch.js*/
 var Toggler = Class.extend({
   init: function(jq_obj){
     this.jq_obj = jq_obj;
@@ -417,14 +483,6 @@ var IhHistoryState = Class.extend({
     this.state = $.extend(true, this.state, new_state);
   }
 })
-var ReplaceDelete = DeleteLink.extend({
-  ajaxSuccess: function(data,textStatus,jqXHR){
-    this.target[this.insert_method](data);
-  },
-  ajaxBefore: function(jqXHR){
-    //noop
-  }
-})
 var GoProxy = Class.extend({
   init: function($proxy){
     this.first_submit = true;
@@ -607,15 +665,11 @@ $(window).bind("popstate", function(e){
   })
 });
 $(document).ready(function(){
-  $('[data-default_tab="true"]').tab('show');
   $(document).on('change','[data-toggler]',function(){
     new Toggler($(this));
   })
   $('[data-toggler]').each(function(){
     new Toggler($(this));
-  })
-  $('[data-zendesk_opener]').click(function(){
-    $("#zenbox_tab").click();
   })
   $('[data-disable_forms]').each(function(){
     new DisableForms($(this));
@@ -624,16 +678,6 @@ $(document).ready(function(){
     new Link($(this));
   })
   // Initailizes auto complete for select inputs
-  $("[data-autocomplete='full_width']").chosen({
-   width: "100%"
-  });
-  $("[data-autocomplete]").chosen();
-
-  $('[data-redirect-path]:first').each(function(){
-    var redirect_seconds = $(this).data('redirect-seconds') * 1000;
-    var redirect_path = $(this).data('redirect-path');
-    setTimeout(function(){window.location = redirect_path},redirect_seconds);
-  })
   $('input,select,textarea').filter(':visible:enabled:first').each(function(){
     if(!$(this).data('date-picker')){
       $(this).focus();
