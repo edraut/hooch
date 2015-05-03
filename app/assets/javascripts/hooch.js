@@ -1,3 +1,13 @@
+var loadJs = function(url){
+  var requested_script = document.createElement('script');
+  requested_script.type = 'text/javascript';
+  requested_script.src = url;
+  document.body.appendChild(requested_script);
+}
+
+if(typeof Class === "undefined"){
+  loadJs('//rawgit.com/edraut/js_inheritance/master/inheritance.js');
+};
 var Toggler = Class.extend({
   init: function(jq_obj){
     this.jq_obj = jq_obj;
@@ -619,10 +629,7 @@ $(document).ready(function(){
   });
 });
 if(typeof any_time_manager === "undefined"){
-    var any_time_script = document.createElement('script');
-    any_time_script.type = 'text/javascript';
-    any_time_script.src = "//rawgit.com/edraut/anytime_manager/master/anytime_manager.js";
-    document.body.appendChild(any_time_script);
+  loadJs("//rawgit.com/edraut/anytime_manager/master/anytime_manager.js");
 };
 any_time_manager.registerListWithClasses({
   'expand-state' : 'Expandable', 'prevent-double-click' : 'PreventDoubleLinkClick'
