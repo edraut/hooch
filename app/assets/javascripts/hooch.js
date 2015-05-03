@@ -1,8 +1,10 @@
 var loadJs = function(url){
-  var requested_script = document.createElement('script');
-  requested_script.type = 'text/javascript';
-  requested_script.src = url;
-  document.body.appendChild(requested_script);
+  $(document).ready(function(){
+    var requested_script = document.createElement('script');
+    requested_script.type = 'text/javascript';
+    requested_script.src = url;
+    document.body.appendChild(requested_script);
+  })
 }
 
 if(typeof Class === "undefined"){
