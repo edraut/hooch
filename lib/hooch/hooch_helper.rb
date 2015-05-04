@@ -2,7 +2,7 @@ module Hooch
   module HoochHelper
     def tab_set(name, type: nil, default_tab: nil)
       if :ajax == type
-        type = 'AjaxTabGroup'
+        type = 'hooch.AjaxTabGroup'
       end
       attrs = 'data-tab-group=' + name
       attrs += ' data-sub-type=' + type if type.present?
@@ -39,7 +39,7 @@ module Hooch
 
     def expanded(id, type: nil)
       if :ajax == type
-        type = 'AjaxExpandable'
+        type = 'hooch.AjaxExpandable'
       end
       attrs = "data-expand-state=expanded data-expand-id=" + id
       attrs += " data-sub-type=" + type if type.present?
