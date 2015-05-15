@@ -445,6 +445,7 @@ var initHooch = function(){
             $clickable.submit(function(e){ double_click_preventer.preventItNow(); });
             break;
           case 'input':
+          default:
             $clickable.click(function() {
               setTimeout(function(){
                 $clickable.attr("disabled", "disabled");
