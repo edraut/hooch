@@ -28,14 +28,6 @@ module Hooch
       attrs = "data-collapser=true data-expand-id=" + id
     end
 
-    def emptier(id)
-      attrs = "data-emptier=true data-target=" + id
-    end
-
-    def remover(id)
-      attrs = "data-remover=true data-target=" + id
-    end
-
     def collapsed(id, type: nil)
       if :ajax == type
         type = 'AjaxExpandable'
@@ -54,10 +46,18 @@ module Hooch
       attrs
     end
 
+    def emptier(id)
+      attrs = "data-emptier=true data-target=" + id
+    end
+
+    def remover(id)
+      attrs = "data-remover=true data-target=" + id
+    end
+
     def revealer(id, type: nil)
       ''.tap do |attrs|
-        attrs += "data-revealer=true data-revealer-children-id=#{id}"
-        attrs += " data-sub-type=#{type}" if type.present?
+        attrs.concat "data-revealer=true data-revealer-children-id=#{id}"
+        attrs.concat " data-sub-type=#{type}" if type.present?
       end
     end
 
@@ -69,28 +69,28 @@ module Hooch
       end
     end
 
-    def click_proxy(target: nil)
+    def click_proxy(target = nil)
       ''.tap do |attrs|
-        attrs += "data-click-proxy=true"
-        attrs += " data-target=#{target}" if target.present?
+        attrs.concat "data-click-proxy=true"
+        attrs.concat " data-target=#{target}" if target.present?
       end
     end
 
-    def click_proxy_hash(target: nil)
+    def click_proxy_hash(target = nil)
       {}.tap do |params|
         params['data-click-proxy'] = true
         params['data-target'] = target if target.present?
       end
     end
 
-    def submit_proxy(target: nil)
+    def submit_proxy(target = nil)
       ''.tap do |attrs|
-        attrs += 'data-submit-proxy=true'
-        attrs += " data-target=#{target}" if target.present?
+        attrs.concat 'data-submit-proxy=true'
+        attrs.concat " data-target=#{target}" if target.present?
       end
     end
 
-    def submit_proxy_hash(target: nil)
+    def submit_proxy_hash(target = nil)
       {}.tap do |params|
         params['data-submit-proxy'] = true
         params['data-target'] = target if target.present?
@@ -99,9 +99,9 @@ module Hooch
 
     def field_filler(target, value)
       ''.tap do |attrs|
-        attrs += 'data-field-filler=true'
-        attrs += " data-target=#{target}"
-        attrs += " data-value=#{value}"
+        attrs.concat 'data-field-filler=true'
+        attrs.concat " data-target=#{target}"
+        attrs.concat " data-value=#{value}"
       end
     end
 
