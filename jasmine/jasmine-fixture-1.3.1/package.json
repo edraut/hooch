@@ -1,0 +1,39 @@
+{
+  "name": "jasmine-fixture",
+  "description": "Makes injecting HTML snippets into the DOM easy & clean!",
+  "version": "1.3.1",
+  "keywords": [
+    "jasmine",
+    "bdd"
+  ],
+  "dependencies": {},
+  "bugs": {
+    "url": "https://github.com/searls/jasmine-fixture/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/searls/jasmine-fixture.git"
+  },
+  "licenses": [
+    {
+      "name": "Apache License 2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "homepage": "https://github.com/searls/jasmine-fixture",
+  "maintainers": [
+    {
+      "name": "Justin Searls",
+      "email": "searls@gmail.com",
+      "web": "http://about.me/searls"
+    }
+  ],
+  "devDependencies": {
+    "lineman": ">= 0.24",
+    "lineman-lib": "0.0.1",
+    "grunt-jasmine-bundle": "~0.1.4",
+    "testem": "~0.6.7",
+    "coffee-script": "~1.6.3",
+    "underscore": "~1.6.0"
+  }
+}
