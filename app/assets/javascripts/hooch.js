@@ -93,14 +93,23 @@ var initHooch = function(){
     }),
     Expandable: Class.extend({
       init: function($expandable){
+        var expandable = this;
+        this.expand_class = $expandable.data('expand-class');
+        this.collapse_class = $expandable.data('collapse-class');
         this.$expandable = $expandable;
         $expandable.data('expandable',this);
-        $collapser = $('[data-expand-id="' + $expandable.data('expand-id') + '"][data-collapser]');
-        if($collapser.length > 0){
-          this.collapser = new hooch.Collapser($collapser,this);
+        this.collapsers = []
+        this.$collapser = $('[data-expand-id="' + $expandable.data('expand-id') + '"][data-collapser]');
+        if(this.$collapser.length > 0){
+          this.$collapser.each(function(){
+            expandable.collapsers.push(new hooch.Collapser($(this),expandable))
+          })
         }
         this.$expander = $('[data-expand-id="' + $expandable.data('expand-id') + '"][data-expander]');
-        this.expander = new hooch.Expander(this.$expander,this);
+        this.expanders = []
+        this.$expander.each(function(){
+          expandable.expanders.push(new hooch.Expander($(this),expandable))
+        })
         this.initial_state = $expandable.data('expand-state');
         if(this.initial_state == 'expanded'){
           this.expand();
@@ -108,19 +117,48 @@ var initHooch = function(){
           this.collapse();
         }
       },
+      hide_expanders: function(){
+        $.each(this.expanders, function(){
+          this.hide();
+        })
+      },
+      hide_collapsers: function(){
+        $.each(this.collapsers, function(){
+          this.hide();
+        })
+      },
+      show_expanders: function(){
+        $.each(this.expanders, function(){
+          this.show();
+        })
+      },
+      show_collapsers: function(){
+        $.each(this.collapsers, function(){
+          this.show();
+        })
+      },
       expand: function(){
-        if(this.collapser){
-          this.expander.hide();
-          this.collapser.show();
+        if(this.collapsers.length > 0){
+
+          this.hide_expanders();
+          this.show_collapsers();
         }
-        this.$expandable.show(10);
+        if(this.expand_class){
+          this.$expandable.addClass(this.expand_class)
+        }else{
+          this.$expandable.show(10);
+        }
       },
       collapse: function(){
-        if(this.collapser){
-          this.collapser.hide();
-          this.expander.show();
+        if(this.collapsers.length > 0){
+          this.hide_collapsers();
+          this.show_expanders();
         }
-        this.$expandable.hide(10);
+        if(this.collapse_class){
+          this.$expandable.addClass(this.collapse_class)
+        }else{
+          this.$expandable.hide(10);
+        }
       },
       toggle: function(){
         this.$expandable.toggle(10);
@@ -138,7 +176,7 @@ var initHooch = function(){
           })
         }
         $expander.bind('click',function(){
-          if(target.collapser){
+          if(target.collapsers.length > 0){
             target.expand();
           } else {
             target.toggle();

@@ -28,21 +28,25 @@ module Hooch
       attrs = "data-collapser=true data-expand-id=" + id
     end
 
-    def collapsed(id, type: nil)
+    def collapsed(id, type: nil, expand_class: nil, collapse_class: nil)
       if :ajax == type
         type = 'AjaxExpandable'
       end
       attrs = "data-expand-state=collapsed data-expand-id=" + id
       attrs += " data-sub-type=" + type if type.present?
+      attrs += " data-expand-class=" + expand_class if expand_class.present?
+      attrs += " data-collapse-class=" + collapse_class if collapse_class.present?
       attrs
     end
 
-    def expanded(id, type: nil)
+    def expanded(id, type: nil, expand_class: nil, collapse_class: nil)
       if :ajax == type
         type = 'AjaxExpandable'
       end
       attrs = "data-expand-state=expanded data-expand-id=" + id
       attrs += " data-sub-type=" + type if type.present?
+      attrs += " data-expand-class=" + expand_class if expand_class.present?
+      attrs += " data-collapse-class=" + collapse_class if collapse_class.present?
       attrs
     end
 
