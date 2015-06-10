@@ -20,8 +20,10 @@ module Hooch
       attrs = 'data-tab-id=' + id
     end
 
-    def expander(id)
+    def expander(id, expand_class: nil)
       attrs = "data-expander=true data-expand-id=" + id
+      attrs += "data-expand-class=" + expand_class if expand_class.present?
+      attrs
     end
 
     def collapser(id)

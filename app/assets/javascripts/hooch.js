@@ -140,33 +140,43 @@ var initHooch = function(){
       expand: function(){
         if(this.collapsers.length > 0){
 
-          this.hide_expanders();
           this.show_collapsers();
         }
+        this.hide_expanders();
         if(this.expand_class){
           this.$expandable.addClass(this.expand_class)
+          this.$expandable.removeClass(this.collapse_class)
         }else{
-          this.$expandable.show(10);
+          this.$expandable.show();
         }
+        this.state = 'expanded'
       },
       collapse: function(){
         if(this.collapsers.length > 0){
           this.hide_collapsers();
-          this.show_expanders();
         }
-        if(this.collapse_class){
+        this.show_expanders();
+        if(this.collapse_class || this.expand_class){
           this.$expandable.addClass(this.collapse_class)
+          this.$expandable.removeClass(this.expand_class)
         }else{
-          this.$expandable.hide(10);
+          this.$expandable.hide();
         }
+        this.state = 'collapsed'
       },
       toggle: function(){
-        this.$expandable.toggle(10);
+        if(this.state == 'collapsed'){
+          this.expand();
+        } else {
+          this.collapse();
+        }
       }
     }),
     Expander: Class.extend({
       init: function($expander,target){
         this.$expander = $expander;
+        this.target = target;
+        this.expand_class = $expander.data('expand-class')
         if($expander.data('fake-dropdown')){
           target.$expandable.on('click',function(){
             target.toggle();
@@ -176,18 +186,22 @@ var initHooch = function(){
           })
         }
         $expander.bind('click',function(){
-          if(target.collapsers.length > 0){
-            target.expand();
-          } else {
-            target.toggle();
-          }
+          target.toggle();
         })
       },
       hide: function(){
-        this.$expander.hide();
+        if(this.expand_class){
+          this.$expander.addClass(this.expand_class)
+        } else if(this.target.collapsers.length > 0) {
+          this.$expander.hide();
+        }
       },
       show: function(){
-        this.$expander.show();
+        if(this.expand_class){
+          this.$expander.removeClass(this.expand_class)
+        } else if(this.target.collapsers.length > 0) {
+          this.$expander.show();
+        }
       }
     }),
     Collapser: Class.extend({
@@ -443,6 +457,31 @@ var initHooch = function(){
         return false;
       }
     }),
+    CheckboxProxy: Class.extend({
+      init: function($proxy){
+        this.$proxy = $proxy;
+        this.target = $($proxy.data('target'));
+        var checkbox_proxy = this;
+        if(checkbox_proxy.target.prop('checked')){
+          this.$proxy.html("&#10003;");
+        }
+        $proxy.on('click',function(){
+          if(checkbox_proxy.target.prop('checked')){
+            checkbox_proxy.uncheck();
+          }else{
+            checkbox_proxy.check();
+          }
+        })
+      },
+      uncheck: function(){
+        this.target.prop('checked', false);
+        this.$proxy.html("");
+      },
+      check: function(){
+        this.target.prop('checked', true);
+        this.$proxy.html("&#10003;");
+      }
+    }),
     Remover: Class.extend({
       init: function($remover){
         $target = $($remover.data('target'));
@@ -620,7 +659,7 @@ var initHooch = function(){
     window.any_time_manager.registerList(
       ['hover_overflow','hidey_button','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
-        'hover-reveal', 'emptier', 'remover'],'hooch');
+        'hover-reveal', 'emptier', 'remover', 'checkbox-proxy'],'hooch');
     window.any_time_manager.load();
   };
   $(document).ready(function(){
