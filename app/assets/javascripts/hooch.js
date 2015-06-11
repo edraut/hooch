@@ -177,6 +177,7 @@ var initHooch = function(){
         this.$expander = $expander;
         this.target = target;
         this.expand_class = $expander.data('expand-class')
+        this.collapse_class = $expander.data('collapse-class')
         if($expander.data('fake-dropdown')){
           target.$expandable.on('click',function(){
             target.toggle();
@@ -190,15 +191,25 @@ var initHooch = function(){
         })
       },
       hide: function(){
-        if(this.expand_class){
-          this.$expander.addClass(this.expand_class)
+        if(this.expand_class || this.collapse_class){
+          if(this.expand_class){
+            this.$expander.addClass(this.expand_class)
+          }
+          if(this.collapse_class){
+            this.$expander.removeClass(this.collapse_class)
+          }
         } else if(this.target.collapsers.length > 0) {
           this.$expander.hide();
         }
       },
       show: function(){
-        if(this.expand_class){
-          this.$expander.removeClass(this.expand_class)
+        if(this.expand_class || this.collapse_class){
+          if(this.expand_class){
+            this.$expander.removeClass(this.expand_class)
+          }
+          if(this.collapse_class){
+            this.$expander.addClass(this.collapse_class)
+          }
         } else if(this.target.collapsers.length > 0) {
           this.$expander.show();
         }

@@ -34,7 +34,7 @@ describe("hooch", function() {
     expect($('[data-expand-state]').css('display')).toEqual('none');
   })
 
-  it('expands an element with a class and modifies trigger with a class', function(){
+  it('expands an element with a class and modifies trigger with an expand class', function(){
     var expander = affix('[data-expander="true"][data-expand-id="my_expander"][data-expand-class="test-class-trigger"]')
     var expandable = affix('[data-expand-state="collapsed"][data-expand-id="my_expander"][data-expand-class="test-class-content"]')
     $('[data-expand-state]').each(function(){new hooch.Expandable($(this))});
@@ -46,6 +46,20 @@ describe("hooch", function() {
     $('[data-expander]').click()
     expect($('[data-expand-state]').hasClass("test-class-content")).toBe(false);
     expect($('[data-expander]').hasClass("test-class-trigger")).toBe(false);
+  })
+
+  it('expands an element with a class and modifies trigger with a collapse class', function(){
+    var expander = affix('[data-expander="true"][data-expand-id="my_expander"][data-collapse-class="test-class-trigger"]')
+    var expandable = affix('[data-expand-state="collapsed"][data-expand-id="my_expander"][data-expand-class="test-class-content"]')
+    $('[data-expand-state]').each(function(){new hooch.Expandable($(this))});
+    expect($('[data-expand-state]').hasClass("test-class-content")).toBe(false);
+    expect($('[data-expander]').hasClass("test-class-trigger")).toBe(true);
+    $('[data-expander]').click()
+    expect($('[data-expand-state]').hasClass("test-class-content")).toBe(true);
+    expect($('[data-expander]').hasClass("test-class-trigger")).toBe(false);
+    $('[data-expander]').click()
+    expect($('[data-expand-state]').hasClass("test-class-content")).toBe(false);
+    expect($('[data-expander]').hasClass("test-class-trigger")).toBe(true);
   })
 
   it('expands and collapses an element with separate triggers', function(){
