@@ -38,6 +38,11 @@ class HoochHelperTest < ActionView::TestCase
     attrs.must_equal "data-expander=true data-expand-id=see_more"
   end
 
+  it "generates expander attrs with classes" do
+    attrs = expander('see_more', expand_class: 'expanded', collapse_class: 'collapsed')
+    attrs.must_equal "data-expander=true data-expand-id=see_more data-expand-class=expanded data-collapse-class=collapsed"
+  end
+
   it "generates collapser attrs" do
     attrs = collapser('see_less')
     attrs.must_equal "data-collapser=true data-expand-id=see_less"
