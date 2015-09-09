@@ -563,16 +563,49 @@ var initHooch = function(){
       init: function(reload_page){
         window.location.href = reload_page;
       }
+    }),
+    FakeSelect: Class.extend({
+      init: function($fake_select){
+        this.select_display = $fake_select.find('[data-select-display]')
+        this.real_select = $fake_select.find('input')
+        var fake_select = this
+        $fake_select.find('[data-select-value][data-select-name]').each(function(){
+          new hooch.FakeOption($(this),fake_select)
+        })
+      },
+      select: function(fake_option){
+        this.select_display.html(fake_option.select_name);
+        this.real_select.val(fake_option.select_value);
+        this.select_display.trigger('click');
+      }
+    }),
+    FakeOption: Class.extend({
+      init: function($fake_option,$fake_select){
+        this.select_value = $fake_option.data('select-value')
+        this.select_name = $fake_option.data('select-name')
+        var fake_option = this
+        $fake_option.on('click',function(){
+          $fake_select.select(fake_option)
+        })
+      }
     })
   };
   hooch.AjaxExpandable = hooch.Expandable.extend({
-      expand: function(){
-        if(!this.ajax_loaded){
-          this.ajax_loaded = true;
-          new thin_man.AjaxLinkSubmission(this.$expander);
-        }
-        this._super();
+    expand: function(){
+      if(!this.ajax_loaded){
+        this.ajax_loaded = true;
+        new thin_man.AjaxLinkSubmission(this.$expander);
       }
+      this._super();
+    }
+  });
+  hooch.SelectActionChanger = hooch.FakeSelect.extend({
+    select: function(fake_option){
+      var form = this.select_display.parents('form:first');
+      form.attr('action', fake_option.select_value);
+      this.select_display.html(fake_option.select_name);
+      this.select_display.trigger('click');
+    }
   });
   hooch.FormFieldRevealer = hooch.Revealer.extend({
     init: function($revealer){
@@ -670,7 +703,7 @@ var initHooch = function(){
     window.any_time_manager.registerList(
       ['hover_overflow','hidey_button','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
-        'hover-reveal', 'emptier', 'remover', 'checkbox-proxy'],'hooch');
+        'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-select', 'select-action-changer'],'hooch');
     window.any_time_manager.load();
   };
   $(document).ready(function(){

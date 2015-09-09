@@ -18,7 +18,7 @@ module.exports = function(config) {
       'test-main.js',
       {pattern: 'jquery.js'},
       {pattern: 'inheritance.js'},
-      {pattern: 'jasmine-fixture-1.3.1/dist/jasmine-fixture.js'},
+      {pattern: 'jasmine-fixture.js'},
       {pattern: '../app/assets/javascripts/hooch.js'},
       {pattern: 'spec/**/*Spec.js', included: false}
     ],
