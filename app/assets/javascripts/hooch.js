@@ -588,8 +588,395 @@ var initHooch = function(){
           $fake_select.select(fake_option)
         })
       }
+    }),
+    Sorter: Class.extend({
+      init: function($sorter){
+        this.$sorter = $sorter;
+        this.width = $sorter.width();
+        this.getSortElements();
+        var sorter = this
+        $(window).on('mouseup', function(e){
+          sorter.onMouseup();
+        });
+        $(window).on('mousemove', function(e){
+          sorter.onMousemove(e)
+        })
+      },
+      onMousemove: function(e){
+        if(this.dragging_element){
+          hooch.pauseEvent(e)
+          this.redrawDraggingElement(e);
+          this.refreshSequence(e)
+          return false
+        }
+      },
+      getSortElements: function(){
+        this.$sort_elements = this.$sorter.children()
+        this.sort_elements = []
+        var sorter = this;
+        this.$sort_elements.each(function(){
+          var sort_element = new hooch.SortElement($(this),sorter)
+          sorter.sort_elements.push(sort_element)
+        })
+        this.row_height = this.sort_elements[0].height;
+        var elem_widths = this.sort_elements.map(function(sort_element,i,arr){return sort_element.width})
+        this.min_elem_width = Math.min.apply(null,elem_widths);
+        this.refreshGrid();
+        if((this.min_elem_width * 2) <= this.width){
+          this.mode = 'Grid'
+        } else {
+          this.mode = 'Vertical'
+        }
+      },
+      refreshGrid: function(){
+        this.rows = {}
+        var sorter = this
+        $.each(this.sort_elements,function(i,sort_element){
+          if(sort_element != sorter.dragging_element){
+            this_element = sort_element
+          } else {
+            this_element = sort_element.placeholder
+          }
+          var elem_top = this_element.getOffset().top;
+          if(!sorter.rows[elem_top]){
+            sorter.rows[elem_top] = []
+          }
+          sorter.rows[elem_top].push(this_element)
+        })
+        this.row_keys = Object.keys(this.rows).map(function(val,i){return parseInt(val)}).sort(sorter.numberSort)
+        $.each(this.rows, function(row_key,row){row.sort(sorter.elementHorizontalSort)})
+      },
+      redrawDraggingElement: function(e){
+        this.dragging_element.setPosition(e);
+      },
+      refreshSequence: function(){
+        var target_location = this.dragging_element.getCenter()
+        var refresh_method = this['refreshSequence' + this.mode]
+        refresh_method.call(this, target_location)
+      },
+      refreshSequenceGrid: function(target_location){
+        var dragging_element = this.dragging_element
+        if(!this.withinCurrentRow(target_location.y)){
+          this.seekCurrentRow(target_location)
+        }
+        if('end' == this.current_row_key){
+          var last_element = this.getLastElement();
+          if(!last_element.is_placeholder){
+            last_element.$sort_element.after(dragging_element.placeholder.$sort_element)
+            this.refreshGrid()
+          }
+        } else if('begin' == this.current_row_key){
+          var first_element = this.getFirstElement();
+          if(!first_element.is_placeholder){
+            first_element.$sort_element.before(dragging_element.placeholder.$sort_element)
+            this.refreshGrid()
+          }
+        } else {
+          var hovered_element = this.getHoveredElementHorizontal(target_location);
+          if(hovered_element){
+            if('leftmost' == hovered_element){
+              var leftmost_element = this.current_row[0]
+              leftmost_element.$sort_element.before(dragging_element.placeholder.$sort_element)
+              this.refreshGrid()
+            } else {
+              hovered_element.$sort_element.after(dragging_element.placeholder.$sort_element);
+              this.refreshGrid()
+            }
+          }
+        }
+      },
+      refreshSequenceVertical: function(target_location){
+        var dragging_element = this.dragging_element
+        var hovered_element = this.getHoveredElementVertical(target_location)
+
+        if(hovered_element){
+          if('first' == hovered_element){
+            var first_key = this.row_keys[0]
+            var first_element = this.rows[first_key][0]
+            first_element.$sort_element.before(dragging_element.placeholder.$sort_element)
+            this.refreshGrid()
+          } else {
+            hovered_element.$sort_element.after(dragging_element.placeholder.$sort_element)
+            this.refreshGrid()
+          }
+        }
+      },
+      rowAfter: function(row){
+        return this.row_keys[this.row_keys.indexOf[row] + 1]
+      },
+      elemAfter: function(row, elem){
+        return row[row.indexOf(elem) + 1]
+      },
+      seekCurrentRow: function(target_location){
+        var sorter = this
+        var row_key = $.grep(this.row_keys,function(rowY,i){
+          var nextRowY = sorter.rowAfter(rowY)
+          var below_top_edge = target_location.y >= rowY
+          if(nextRowY){
+            var above_bottom_edge = target_location.y < nextRowY
+          } else {
+            var above_bottom_edge = target_location.y < (rowY + sorter.row_height)
+          }
+          return (below_top_edge && above_bottom_edge)
+        })[0]
+        if(row_key){
+          this.current_row_key = row_key;
+          this.current_row = this.rows[row_key];
+        } else if(target_location.y > this.rows[Math.max.apply(null,this.row_keys)][0].getOffset().top) {
+          this.current_row_key = 'end';
+          this.current_row = undefined;
+        } else {
+          this.current_row_key = 'begin';
+          this.current_row = undefined;
+        }
+      },
+      getHoveredElementHorizontal: function(target_location){
+        var current_element = false;
+        var sorter = this
+        current_element = $.grep(this.current_row, function(sort_element,i){
+          if(!sort_element.is_placeholder){
+            var elem_center = sort_element.getCenter();
+            var slot_left = elem_center.x;
+            var past_left_edge = target_location.x >= slot_left
+
+            var next_elem = sorter.elemAfter(sorter.current_row, sort_element)
+            var before_right_edge
+            if(next_elem){
+              if(!next_elem.is_placeholder){
+                var next_elem_center = next_elem.getCenter();
+                before_right_edge = target_location.x < next_elem_center.x
+              }
+            } else {
+              before_right_edge = past_left_edge
+            }
+            return (past_left_edge && before_right_edge)
+          }
+          return false
+        })[0]
+        if(current_element){
+          return current_element
+        } else {
+          var first_elem = this.current_row[0]
+          if(first_elem && !first_elem.is_placeholder && first_elem.getCenter().x > target_location.x){
+            return 'leftmost'
+          }
+        }
+      },
+      getHoveredElementVertical: function(target_location){
+        var sorter = this
+        current_element_key = $.grep(sorter.row_keys, function(row_key,i){
+          var this_elem = sorter.rows[row_key][0]
+          if(!this_elem.is_placeholder){
+            var elem_center = this_elem.getCenter()
+            var slot_top = elem_center.y
+            var below_top_edge = target_location.y >= slot_top
+            var next_row = sorter.rows[sorter.row_keys[i+1]]
+            var above_bottom_edge
+            var next_elem
+            if(next_row){
+              next_elem = next_row[0]
+              if(next_elem && !next_elem.is_placeholder){
+                var next_elem_center = next_elem.getCenter()
+                above_bottom_edge = target_location.y < next_elem_center.y
+              }
+            }
+            if(!next_elem){
+              above_bottom_edge = below_top_edge
+            }
+            return(below_top_edge && above_bottom_edge)
+          }
+          return false
+        })[0]
+        if(current_element_key){
+          return this.rows[current_element_key][0]
+        } else {
+          var first_key = this.row_keys[0]
+          var first_elem = this.rows[first_key][0]
+          if(first_elem && !first_elem.is_placeholder && first_elem.getCenter().y > target_location.y){
+            return 'first'
+          }
+        }
+      },
+      getLastElement: function(){
+        var last_row_key = this.row_keys[this.row_keys.length-1]
+        var last_row = this.rows[last_row_key];
+        return last_row[last_row.length-1]
+      },
+      getFirstElement: function(){
+        var first_row_key = this.row_keys[0]
+        var first_row = this.rows[first_row_key]
+        return first_row[0]
+      },
+      elementHorizontalSort: function(a,b){
+        if(a.getOffset().left < b.getOffset().left){
+          return -1
+        }
+        if(b.getOffset().left < a.getOffset().left){
+          return 1
+        }
+        return 0
+      },
+      numberSort: function(a,b){
+        if(parseInt(a) < parseInt(b)){return -1}
+        if(parseInt(b) < parseInt(a)){return 1}
+        return 0
+      },
+      withinCurrentRow: function(y_value){
+        if(this.current_row_key){
+          var top_edge = this.current_row_key
+          var bottom_edge = top_edge + this.row_height;
+          var in_current_row = (top_edge < y_value) && (y_value < bottom_edge)
+          if(in_current_row){
+            this.current_row = this.rows[this.current_row_key]
+          }
+          return in_current_row
+        }
+        return false
+      },
+      setDraggingElement: function(sort_element){
+        this.dragging_element = sort_element;
+        var current_row = this.rows[this.dragging_element.starting_offset.top]
+        drag_index = current_row.indexOf(sort_element)
+        if(drag_index > -1){
+          current_row.splice(drag_index, 1)
+        }
+        current_row.push(this.dragging_element.placeholder)
+        this.refreshGrid();
+      },
+      clearDraggingElement: function(){
+        if(this.dragging_element){
+          this.removeDraggingElement()
+        }
+      },
+      onMouseup: function(){
+        this.removeDraggingElement()
+        this.sendSort()
+      },
+      removeDraggingElement: function(){
+        if(this.dragging_element){
+          var placeholder_row = this.removePlaceholder()
+          this.rows[placeholder_row].push(this.dragging_element)
+          this.dragging_element.drop()
+          this.dragging_element = undefined;
+          this.refreshGrid();
+        }
+      },
+      sendSort: function(){
+        $.ajax({
+          url: this.$sorter.attr('href'),
+          method: 'PATCH',
+          data: this.getFormData()
+        })
+      },
+      getFormData: function(){
+        var id_array = $.map(this.$sorter.children(),function(e,i){return $(e).attr('id')})
+        var first_id = id_array[0]
+        var last_underscore_location = first_id.lastIndexOf('_')
+        var array_name = first_id.slice(0,last_underscore_location)
+        var form_data = {}
+        form_data[array_name] = id_array.map(function(id){
+          return id.slice((last_underscore_location + 1))
+        })
+        return form_data
+      },
+      removePlaceholder: function(){
+        var sorter = this
+        return $.grep(this.row_keys, function(row_key,i){
+          var placeholder_index = sorter.rows[row_key].indexOf(sorter.dragging_element.placeholder)
+          if(placeholder_index > -1){
+            sorter.rows[row_key].slice(placeholder_index,1)
+            return true
+          }
+          return false
+        })[0]
+      }
+    }),
+    SortElement: Class.extend({
+      init: function($sort_element,sorter){
+        this.sorter = sorter;
+        this.$sort_element = $sort_element;
+        this.old_position = $sort_element.css('position')
+        this.width = this.$sort_element.width()
+        this.height = this.$sort_element.height()
+        var sort_element = this
+        this.$sort_element.on('dragstart', function(e){
+          hooch.pauseEvent(e)
+          return false
+        })
+        this.$sort_element.on('mousedown', $.proxy(sort_element.onMousedown, sort_element))
+      },
+      onMousedown: function(e){
+        if(1 == e.which){
+          this.sorter.clearDraggingElement();
+          hooch.pauseEvent(e)
+          this.starting_offset = this.getOffset();
+          this.mouse_start = {top: e.originalEvent.pageY, left: e.originalEvent.pageX}
+          this.placeholder = new hooch.SortPlaceholder(this.$sort_element.clone().removeAttr('id').css({width: this.width, height: this.height}),this.sorter)
+          this.placeholder.css({'visibility': 'hidden'});
+          this.placeholder.css({background: 'none', 'background-color': 'pink'});
+          $tmp = $('<div style="display: none;"></div>')
+          this.$sort_element.before($tmp)
+          this.$sort_element
+            .css({position: 'absolute', top: this.starting_offset.top, left: this.starting_offset.left})
+            .appendTo('body')
+          $tmp.replaceWith(this.placeholder.$sort_element)
+          this.sorter.setDraggingElement(this,e);
+          return false;
+        }
+      },
+      drop: function(){
+        this.css({position: this.old_position, top: '', left: ''})
+        this.placeholder.replaceWith(this.$sort_element);
+        this.placeholder = undefined
+      },
+      getOffset: function(){
+        return this.$sort_element.offset();
+      },
+      setPosition: function(e){
+        var delta = this.getDelta(e)
+        var new_position = this.getNewPosition(delta);
+        this.$sort_element.css(new_position);
+      },
+      getDelta: function(e){
+        return {
+          top: (e.originalEvent.pageY - this.mouse_start.top),
+          left: (e.originalEvent.pageX - this.mouse_start.left)
+        }
+      },
+      getNewPosition: function(delta){
+        return {top: (this.starting_offset.top + delta.top), left: (this.starting_offset.left + delta.left)}
+      },
+      getCenter: function(){
+        var new_offset = this.getOffset()
+        var newX = new_offset.left
+        var newY = new_offset.top
+        var width = this.width
+        var height = this.height
+        var centerX = newX + (width / 2)
+        var centerY = newY + (height / 2)
+        var center = {x: centerX, y: centerY}
+        return center
+      },
+      clone: function(){
+        return this.$sort_element.clone();
+      },
+      css: function(css_obj){
+        this.$sort_element.css(css_obj);
+      },
+      replaceWith: function($jq_obj){
+        this.$sort_element.replaceWith($jq_obj)
+      }
     })
   };
+  hooch.SortPlaceholder = hooch.SortElement.extend({
+    init: function($sort_element,sorter){
+      this.sorter = sorter;
+      this.is_placeholder = true;
+      this.$sort_element = $sort_element;
+      this.width = this.$sort_element.width()
+      this.height = this.$sort_element.height()
+    }
+  })
   hooch.AjaxExpandable = hooch.Expandable.extend({
     expand: function(){
       if(!this.ajax_loaded){
@@ -703,9 +1090,16 @@ var initHooch = function(){
     window.any_time_manager.registerList(
       ['hover_overflow','hidey_button','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
-        'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-select', 'select-action-changer'],'hooch');
+        'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-select', 'select-action-changer',
+        'sorter'],'hooch');
     window.any_time_manager.load();
   };
+  hooch.pauseEvent = function(e){
+    if(e.stopPropagation) e.stopPropagation();
+    if(e.preventDefault) e.preventDefault();
+    e.cancelBubble=true;
+    e.returnValue=false;
+  }
   $(document).ready(function(){
     if(typeof window.any_time_manager === "undefined" && typeof window.loading_any_time_manager === "undefined"){
       window.loading_any_time_manager = true;
