@@ -604,11 +604,43 @@ var initHooch = function(){
       },
       onMousemove: function(e){
         if(this.dragging_element){
-          hooch.pauseEvent(e)
-          this.redrawDraggingElement(e);
-          this.refreshSequence(e)
-          return false
+          this.handleMouseMove(e)
+        } else {
+          var pressed_element = this.getPressedElement()
+          if(pressed_element){
+            pressed_element.setDragging()
+            this.handleMouseMove(e)
+          }
         }
+        return true
+      },
+      handleMouseMove: function(e){
+        hooch.pauseEvent(e)
+        this.dragging_element.dragging = true
+        this.redrawDraggingElement(e);
+        this.refreshSequence(e)
+        return false
+      },
+      onMouseup: function(){
+        if(this.dragging_element){
+          var tmp_dragging_element = this.dragging_element
+          this.removeDraggingElement()
+          if(tmp_dragging_element.dragging){
+            this.sendSort()
+          }
+          tmp_dragging_element.dragging = false
+        }
+        var pressed_element = this.getPressedElement()
+        if(pressed_element){
+          pressed_element.unSetPressed()
+        }
+      },
+      getPressedElement: function(){
+        var possible_pressed_element = $.grep(this.sort_elements, function(sort_element,i){return sort_element.pressed})
+        if(possible_pressed_element.length > 0){
+          return possible_pressed_element[0]
+        }
+        return false
       },
       getSortElements: function(){
         this.$sort_elements = this.$sorter.children()
@@ -848,10 +880,6 @@ var initHooch = function(){
           this.removeDraggingElement()
         }
       },
-      onMouseup: function(){
-        this.removeDraggingElement()
-        this.sendSort()
-      },
       removeDraggingElement: function(){
         if(this.dragging_element){
           var placeholder_row = this.removePlaceholder()
@@ -877,6 +905,9 @@ var initHooch = function(){
         form_data[array_name] = id_array.map(function(id){
           return id.slice((last_underscore_location + 1))
         })
+        if(this.$sorter.data('sort-field')){
+          form_data['sort_field'] = this.$sorter.data('sort-field')
+        }
         return form_data
       },
       removePlaceholder: function(){
@@ -898,6 +929,7 @@ var initHooch = function(){
         this.old_position = $sort_element.css('position')
         this.width = this.$sort_element.width()
         this.height = this.$sort_element.height()
+        this.dragging = false
         var sort_element = this
         this.$sort_element.on('dragstart', function(e){
           hooch.pauseEvent(e)
@@ -908,21 +940,27 @@ var initHooch = function(){
       onMousedown: function(e){
         if(1 == e.which){
           this.sorter.clearDraggingElement();
-          hooch.pauseEvent(e)
+          this.pressed = true
           this.starting_offset = this.getOffset();
           this.mouse_start = {top: e.originalEvent.pageY, left: e.originalEvent.pageX}
-          this.placeholder = new hooch.SortPlaceholder(this.$sort_element.clone().removeAttr('id').css({width: this.width, height: this.height}),this.sorter)
-          this.placeholder.css({'visibility': 'hidden'});
-          this.placeholder.css({background: 'none', 'background-color': 'pink'});
-          $tmp = $('<div style="display: none;"></div>')
-          this.$sort_element.before($tmp)
-          this.$sort_element
-            .css({position: 'absolute', top: this.starting_offset.top, left: this.starting_offset.left})
-            .appendTo('body')
-          $tmp.replaceWith(this.placeholder.$sort_element)
-          this.sorter.setDraggingElement(this,e);
-          return false;
         }
+      },
+      unSetPressed: function(){
+        this.pressed = false
+      },
+      setDragging: function(){
+        this.sorter.clearDraggingElement();
+        this.unSetPressed()
+        this.placeholder = new hooch.SortPlaceholder(this.$sort_element.clone().removeAttr('id').css({width: this.width, height: this.height}),this.sorter)
+        this.placeholder.css({'visibility': 'hidden'});
+        this.placeholder.css({background: 'none', 'background-color': 'pink'});
+        $tmp = $('<div style="display: none;"></div>')
+        this.$sort_element.before($tmp)
+        this.$sort_element
+          .css({position: 'absolute', top: this.starting_offset.top, left: this.starting_offset.left})
+          .appendTo('body')
+        $tmp.replaceWith(this.placeholder.$sort_element)
+        this.sorter.setDraggingElement(this);
       },
       drop: function(){
         this.css({position: this.old_position, top: '', left: ''})
