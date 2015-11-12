@@ -1,0 +1,11 @@
+test:
+  override:
+    - cd jasmine && node_modules/karma-cli/bin/karma start
+database:
+  override:
+    - ls
+dependencies:
+  override:
+    - cd jasmine && npm install
+  cache_directories:
+    - "jasmine/node_modules"
