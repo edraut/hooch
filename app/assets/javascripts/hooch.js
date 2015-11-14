@@ -591,9 +591,10 @@ var initHooch = function(){
     }),
     Sorter: Class.extend({
       init: function($sorter){
-        this.$sorter = $sorter;
-        this.width = $sorter.width();
-        this.getSortElements();
+        this.$sorter = $sorter
+        $sorter.data('sorter',this)
+        this.width = $sorter.width()
+        this.getSortElements()
         var sorter = this
         $(window).on('mouseup', function(e){
           sorter.onMouseup();
@@ -927,15 +928,23 @@ var initHooch = function(){
         this.sorter = sorter;
         this.$sort_element = $sort_element;
         this.old_position = $sort_element.css('position')
-        this.width = this.$sort_element.width()
-        this.height = this.$sort_element.height()
+        this.starting_width = this.$sort_element.css('width')
+        this.starting_height = this.$sort_element.css('height')
+        this.starting_top = this.$sort_element.css('top')
+        this.starting_left = this.$sort_element.css('left')
+        if(typeof(window.getComputedStyle) == 'function'){
+          var computed_style = window.getComputedStyle(this.$sort_element[0])
+          this.width = parseInt(computed_style.width)
+          this.height = parseInt(computed_style.height)
+        }else{
+          this.width = this.$sort_element.width()
+          this.height = this.$sort_element.height()
+        }
         this.dragging = false
+        this.getDragHandle()
         var sort_element = this
-        this.$sort_element.on('dragstart', function(e){
-          hooch.pauseEvent(e)
-          return false
-        })
-        this.$sort_element.on('mousedown', $.proxy(sort_element.onMousedown, sort_element))
+        this.$drag_handle.on('mousedown', $.proxy(sort_element.onMousedown, sort_element))
+        this.$sort_element.on('dragstart', function(e){hooch.pauseEvent(e); return false})
       },
       onMousedown: function(e){
         if(1 == e.which){
@@ -948,22 +957,28 @@ var initHooch = function(){
       unSetPressed: function(){
         this.pressed = false
       },
+      getDragHandle: function(){
+        this.$drag_handle = this.$sort_element.find('[data-drag-handle]')
+        if(this.$drag_handle.length < 1){
+          this.$drag_handle = this.$sort_element
+        }
+      },
       setDragging: function(){
         this.sorter.clearDraggingElement();
         this.unSetPressed()
         this.placeholder = new hooch.SortPlaceholder(this.$sort_element.clone().removeAttr('id').css({width: this.width, height: this.height}),this.sorter)
         this.placeholder.css({'visibility': 'hidden'});
-        this.placeholder.css({background: 'none', 'background-color': 'pink'});
+        // this.placeholder.css({'background-color': 'pink'});
         $tmp = $('<div style="display: none;"></div>')
         this.$sort_element.before($tmp)
         this.$sort_element
-          .css({position: 'absolute', top: this.starting_offset.top, left: this.starting_offset.left})
+          .css({position: 'absolute', top: this.starting_offset.top, left: this.starting_offset.left, width: this.width, height: this.height})
           .appendTo('body')
         $tmp.replaceWith(this.placeholder.$sort_element)
         this.sorter.setDraggingElement(this);
       },
       drop: function(){
-        this.css({position: this.old_position, top: '', left: ''})
+        this.css({position: this.old_position, top: this.starting_top, left: this.starting_left, width: this.starting_width, height: this.starting_height})
         this.placeholder.replaceWith(this.$sort_element);
         this.placeholder = undefined
       },
@@ -1003,6 +1018,11 @@ var initHooch = function(){
       },
       replaceWith: function($jq_obj){
         this.$sort_element.replaceWith($jq_obj)
+      }
+    }),
+    NewSortElement: Class.extend({
+      init: function($new_sort_element){
+        $new_sort_element.parent().data('sorter').getSortElements();
       }
     })
   };
@@ -1129,7 +1149,7 @@ var initHooch = function(){
       ['hover_overflow','hidey_button','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
         'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-select', 'select-action-changer',
-        'sorter'],'hooch');
+        'sorter','new-sort-element'],'hooch');
     window.any_time_manager.load();
   };
   hooch.pauseEvent = function(e){

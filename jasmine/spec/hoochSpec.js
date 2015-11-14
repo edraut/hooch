@@ -143,6 +143,21 @@ describe("hooch", function() {
       expect(sorter.dragging_element).toBeUndefined()
 
     })
+    it("Handles mousedown on a drag handle if provided", function(){
+      // With no drag handle specified, the entire sort element must be draggable
+      expect(sort_elem_a.$drag_handle.attr('id')).toEqual('a')
+
+      // Now set up a sorter with handles
+      $sorter_with_handles = affix('div[data-sorter][style="width: 300px;"]')
+      $sort_elem_with_handle = $sorter_with_handles.affix('div#handled[style="width: 100px; height: 100px; position:relative; float:left;"]')
+      $sort_elem_with_handle.affix('div#the_handle[data-drag-handle]')
+
+      sorter_with_handles = new hooch.Sorter($sorter_with_handles)
+      sort_elem_with_handle = $.grep(sorter_with_handles.sort_elements, function(elem,i){
+        return 'handled' == elem.$sort_element.attr('id')
+      })[0]
+      expect(sort_elem_with_handle.$drag_handle.attr('id')).toEqual('the_handle')
+    })
     it('Handles the initial mousemove when dragging an element', function(){
       sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
       sorter.onMousemove({originalEvent: {pageY: 10, pageX: 11}})
