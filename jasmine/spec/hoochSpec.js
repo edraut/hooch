@@ -1,3 +1,10 @@
+MutationObserver = Class.extend({
+  init: function(callback){},
+  observe: function(elem,config){}
+})
+String.prototype.startsWith = function(prefix) {
+    return this.slice(0, prefix.length) == prefix;
+}
 describe("hooch", function() {
 
   it("Emptier", function() {
@@ -143,6 +150,21 @@ describe("hooch", function() {
       expect(sorter.dragging_element).toBeUndefined()
 
     })
+    it("Handles mousedown on a drag handle if provided", function(){
+      // With no drag handle specified, the entire sort element must be draggable
+      expect(sort_elem_a.$drag_handle.attr('id')).toEqual('a')
+
+      // Now set up a sorter with handles
+      $sorter_with_handles = affix('div[data-sorter][style="width: 300px;"]')
+      $sort_elem_with_handle = $sorter_with_handles.affix('div#handled[style="width: 100px; height: 100px; position:relative; float:left;"]')
+      $sort_elem_with_handle.affix('div#the_handle[data-drag-handle]')
+
+      sorter_with_handles = new hooch.Sorter($sorter_with_handles)
+      sort_elem_with_handle = $.grep(sorter_with_handles.sort_elements, function(elem,i){
+        return 'handled' == elem.$sort_element.attr('id')
+      })[0]
+      expect(sort_elem_with_handle.$drag_handle.attr('id')).toEqual('the_handle')
+    })
     it('Handles the initial mousemove when dragging an element', function(){
       sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
       sorter.onMousemove({originalEvent: {pageY: 10, pageX: 11}})
@@ -197,6 +219,23 @@ describe("hooch", function() {
       sorter.$sorter.attr('data-sort-field','my_sort')
       form_data = sorter.getFormData()
       expect(form_data['sort_field']).toEqual('my_sort')
+    })
+    it('dynamically adds sort elements', function(){
+      var $sort_elem_e = $sorter.affix('div#e[style="width: 100px; height: 100px; position:relative; float:left;"]')
+      sorter.handleMutations([{addedNodes: [$sort_elem_e[0]], removedNodes: []}])
+      var sort_elem_e = $.grep(sorter.sort_elements, function(elem,i){
+        return 'e' == elem.$sort_element.attr('id')
+      })[0]
+      expect(sort_elem_e.$sort_element.attr('id')).toEqual('e')
+    })
+    it('dynamically removes sort elements', function(){
+      $sort_elem_c.detach()
+      sorter.handleMutations([{addedNodes: [], removedNodes: [$sort_elem_c[0]]}])
+      var sort_elem_c = $.grep(sorter.sort_elements, function(elem,i){
+        return 'c' == elem.$sort_element.attr('id')
+      })[0]
+      expect(sort_elem_c).toBeUndefined()
+      expect(sorter.sort_elements.length).toEqual(3)
     })
   })
 });
