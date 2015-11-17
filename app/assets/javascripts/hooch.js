@@ -602,6 +602,11 @@ var initHooch = function(){
         $(window).on('mousemove', function(e){
           sorter.onMousemove(e)
         })
+        var observer = new MutationObserver(function(mutations) {
+          sorter.handleMutations(mutations)
+        });
+        var config = { childList: true };
+        observer.observe($sorter[0], config);
       },
       onMousemove: function(e){
         if(this.dragging_element){
@@ -636,6 +641,23 @@ var initHooch = function(){
           pressed_element.unSetPressed()
         }
       },
+      handleMutations: function(mutations){
+        var sorter = this;
+        mutations.forEach(function(mutation) {
+          if(mutation.addedNodes.length > 0){
+            var added_node = $(mutation.addedNodes[0])
+            if((added_node.attr('id') && !added_node.attr('id').startsWith('thin_man_ajax_progress')) && !added_node.data('hooch-sorter-managed')){
+              sorter.getSortElements()
+            }
+          }
+          if(mutation.removedNodes.length > 0){
+            var removed_node = $(mutation.removedNodes[0])
+            if((removed_node.attr('id') && !removed_node.attr('id').startsWith('thin_man_ajax_progress')) && !removed_node.data('hooch-sorter-managed')){
+              sorter.getSortElements()
+            }
+          }
+        });
+      },
       getPressedElement: function(){
         var possible_pressed_element = $.grep(this.sort_elements, function(sort_element,i){return sort_element.pressed})
         if(possible_pressed_element.length > 0){
@@ -651,14 +673,16 @@ var initHooch = function(){
           var sort_element = new hooch.SortElement($(this),sorter)
           sorter.sort_elements.push(sort_element)
         })
-        this.row_height = this.sort_elements[0].height;
-        var elem_widths = this.sort_elements.map(function(sort_element,i,arr){return sort_element.width})
-        this.min_elem_width = Math.min.apply(null,elem_widths);
-        this.refreshGrid();
-        if((this.min_elem_width * 2) <= this.width){
-          this.mode = 'Grid'
-        } else {
-          this.mode = 'Vertical'
+        if(this.sort_elements.length > 0){
+          this.row_height = this.sort_elements[0].height;
+          var elem_widths = this.sort_elements.map(function(sort_element,i,arr){return sort_element.width})
+          this.min_elem_width = Math.min.apply(null,elem_widths);
+          this.refreshGrid();
+          if((this.min_elem_width * 2) <= this.width){
+            this.mode = 'Grid'
+          } else {
+            this.mode = 'Vertical'
+          }
         }
       },
       refreshGrid: function(){
@@ -928,10 +952,10 @@ var initHooch = function(){
         this.sorter = sorter;
         this.$sort_element = $sort_element;
         this.old_position = $sort_element.css('position')
-        this.starting_width = this.$sort_element.css('width')
-        this.starting_height = this.$sort_element.css('height')
-        this.starting_top = this.$sort_element.css('top')
-        this.starting_left = this.$sort_element.css('left')
+        this.starting_width = this.$sort_element[0].style.height
+        this.starting_height = this.$sort_element[0].style.width
+        this.starting_top = this.$sort_element[0].style.top
+        this.starting_left = this.$sort_element[0].style.left
         if(typeof(window.getComputedStyle) == 'function'){
           var computed_style = window.getComputedStyle(this.$sort_element[0])
           this.width = parseInt(computed_style.width)
@@ -942,6 +966,7 @@ var initHooch = function(){
         }
         this.dragging = false
         this.getDragHandle()
+        this.$drag_handle.css({cursor: 'move'});
         var sort_element = this
         this.$drag_handle.on('mousedown', $.proxy(sort_element.onMousedown, sort_element))
         this.$sort_element.on('dragstart', function(e){hooch.pauseEvent(e); return false})
@@ -966,19 +991,20 @@ var initHooch = function(){
       setDragging: function(){
         this.sorter.clearDraggingElement();
         this.unSetPressed()
-        this.placeholder = new hooch.SortPlaceholder(this.$sort_element.clone().removeAttr('id').css({width: this.width, height: this.height}),this.sorter)
+        this.placeholder = new hooch.SortPlaceholder(this.$sort_element.clone().removeAttr('id').css({width: this.width, height: this.height}).data('hooch-sorter-managed',true),this.sorter)
         this.placeholder.css({'visibility': 'hidden'});
         // this.placeholder.css({'background-color': 'pink'});
-        $tmp = $('<div style="display: none;"></div>')
+        $tmp = $('<div style="display: none;" data-hooch-sorter-managed></div>')
         this.$sort_element.before($tmp)
         this.$sort_element
           .css({position: 'absolute', top: this.starting_offset.top, left: this.starting_offset.left, width: this.width, height: this.height})
+          .data('hooch-sorter-managed',true)
           .appendTo('body')
         $tmp.replaceWith(this.placeholder.$sort_element)
         this.sorter.setDraggingElement(this);
       },
       drop: function(){
-        this.css({position: this.old_position, top: this.starting_top, left: this.starting_left, width: this.starting_width, height: this.starting_height})
+        this.css({position: this.old_position, top: this.starting_top, left: this.starting_left, width: this.starting_width, height: this.starting_height}).data('hooch-sorter-managed',true)
         this.placeholder.replaceWith(this.$sort_element);
         this.placeholder = undefined
       },
@@ -1014,15 +1040,10 @@ var initHooch = function(){
         return this.$sort_element.clone();
       },
       css: function(css_obj){
-        this.$sort_element.css(css_obj);
+        return this.$sort_element.css(css_obj);
       },
       replaceWith: function($jq_obj){
         this.$sort_element.replaceWith($jq_obj)
-      }
-    }),
-    NewSortElement: Class.extend({
-      init: function($new_sort_element){
-        $new_sort_element.parent().data('sorter').getSortElements();
       }
     })
   };
@@ -1149,7 +1170,7 @@ var initHooch = function(){
       ['hover_overflow','hidey_button','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
         'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-select', 'select-action-changer',
-        'sorter','new-sort-element'],'hooch');
+        'sorter'],'hooch');
     window.any_time_manager.load();
   };
   hooch.pauseEvent = function(e){

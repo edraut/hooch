@@ -1,3 +1,10 @@
+MutationObserver = Class.extend({
+  init: function(callback){},
+  observe: function(elem,config){}
+})
+String.prototype.startsWith = function(prefix) {
+    return this.slice(0, prefix.length) == prefix;
+}
 describe("hooch", function() {
 
   it("Emptier", function() {
@@ -212,6 +219,23 @@ describe("hooch", function() {
       sorter.$sorter.attr('data-sort-field','my_sort')
       form_data = sorter.getFormData()
       expect(form_data['sort_field']).toEqual('my_sort')
+    })
+    it('dynamically adds sort elements', function(){
+      var $sort_elem_e = $sorter.affix('div#e[style="width: 100px; height: 100px; position:relative; float:left;"]')
+      sorter.handleMutations([{addedNodes: [$sort_elem_e[0]], removedNodes: []}])
+      var sort_elem_e = $.grep(sorter.sort_elements, function(elem,i){
+        return 'e' == elem.$sort_element.attr('id')
+      })[0]
+      expect(sort_elem_e.$sort_element.attr('id')).toEqual('e')
+    })
+    it('dynamically removes sort elements', function(){
+      $sort_elem_c.detach()
+      sorter.handleMutations([{addedNodes: [], removedNodes: [$sort_elem_c[0]]}])
+      var sort_elem_c = $.grep(sorter.sort_elements, function(elem,i){
+        return 'c' == elem.$sort_element.attr('id')
+      })[0]
+      expect(sort_elem_c).toBeUndefined()
+      expect(sorter.sort_elements.length).toEqual(3)
     })
   })
 });
