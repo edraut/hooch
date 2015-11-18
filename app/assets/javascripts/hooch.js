@@ -605,7 +605,7 @@ var initHooch = function(){
         var observer = new MutationObserver(function(mutations) {
           sorter.handleMutations(mutations)
         });
-        var config = { childList: true };
+        var config = { childList: true, subtree: true };
         observer.observe($sorter[0], config);
       },
       onMousemove: function(e){
@@ -646,13 +646,13 @@ var initHooch = function(){
         mutations.forEach(function(mutation) {
           if(mutation.addedNodes.length > 0){
             var added_node = $(mutation.addedNodes[0])
-            if((added_node.attr('id') && !added_node.attr('id').startsWith('thin_man_ajax_progress')) && !added_node.data('hooch-sorter-managed')){
+            if((!added_node.attr('id') || !added_node.attr('id').startsWith('thin_man_ajax_progress')) && !added_node.data('hooch-sorter-managed')){
               sorter.getSortElements()
             }
           }
           if(mutation.removedNodes.length > 0){
             var removed_node = $(mutation.removedNodes[0])
-            if((removed_node.attr('id') && !removed_node.attr('id').startsWith('thin_man_ajax_progress')) && !removed_node.data('hooch-sorter-managed')){
+            if((!removed_node.attr('id') || !removed_node.attr('id').startsWith('thin_man_ajax_progress')) && !removed_node.data('hooch-sorter-managed')){
               sorter.getSortElements()
             }
           }
@@ -700,7 +700,7 @@ var initHooch = function(){
           }
           sorter.rows[elem_top].push(this_element)
         })
-        this.row_keys = Object.keys(this.rows).map(function(val,i){return parseInt(val)}).sort(sorter.numberSort)
+        this.row_keys = Object.keys(this.rows).map(function(val,i){return parseFloat(val)}).sort(sorter.numberSort)
         $.each(this.rows, function(row_key,row){row.sort(sorter.elementHorizontalSort)})
       },
       redrawDraggingElement: function(e){
@@ -966,6 +966,7 @@ var initHooch = function(){
         }
         this.dragging = false
         this.getDragHandle()
+        this.$sort_element.css({cursor: ''});
         this.$drag_handle.css({cursor: 'move'});
         var sort_element = this
         this.$drag_handle.on('mousedown', $.proxy(sort_element.onMousedown, sort_element))
