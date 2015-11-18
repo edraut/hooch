@@ -933,6 +933,10 @@ var initHooch = function(){
         if(this.$sorter.data('sort-field')){
           form_data['sort_field'] = this.$sorter.data('sort-field')
         }
+        var csrf_token = $('[name="csrf-token"]').attr('content')
+        if(csrf_token){
+          form_data['authenticity_token'] = csrf_token
+        }
         return form_data
       },
       removePlaceholder: function(){
