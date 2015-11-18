@@ -995,7 +995,7 @@ var initHooch = function(){
         this.placeholder = new hooch.SortPlaceholder(this.$sort_element.clone().removeAttr('id').css({width: this.width, height: this.height}).data('hooch-sorter-managed',true),this.sorter)
         this.placeholder.css({'visibility': 'hidden'});
         // this.placeholder.css({'background-color': 'pink'});
-        $tmp = $('<div style="display: none;" data-hooch-sorter-managed></div>')
+        $tmp = $('<div style="display: none;" data-hooch-sorter-managed="true"></div>')
         this.$sort_element.before($tmp)
         this.$sort_element
           .css({position: 'absolute', top: this.starting_offset.top, left: this.starting_offset.left, width: this.width, height: this.height})
