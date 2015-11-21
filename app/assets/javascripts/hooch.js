@@ -969,12 +969,22 @@ var initHooch = function(){
           this.height = this.$sort_element.height()
         }
         this.dragging = false
-        this.getDragHandle()
-        this.$sort_element.css({cursor: ''});
-        this.$drag_handle.css({cursor: 'move'});
-        var sort_element = this
-        this.$drag_handle.on('mousedown', $.proxy(sort_element.onMousedown, sort_element))
-        this.$sort_element.on('dragstart', function(e){hooch.pauseEvent(e); return false})
+        this.determineIfSortable();
+        if(this.sortable){
+          this.getDragHandle()
+          this.$sort_element.css({cursor: ''});
+          this.$drag_handle.css({cursor: 'move'});
+          var sort_element = this
+          this.$drag_handle.on('mousedown', $.proxy(sort_element.onMousedown, sort_element))
+          this.$sort_element.on('dragstart', function(e){hooch.pauseEvent(e); return false})
+        }
+      },
+      determineIfSortable: function(){
+        if(this.$sort_element.find('[data-sorter]').length > 0){
+          this.sortable = false
+        } else {
+          this.sortable = true
+        }
       },
       onMousedown: function(e){
         if(1 == e.which){
