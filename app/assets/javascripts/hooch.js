@@ -2,7 +2,7 @@ var initHooch = function(){
   hooch = {
     Emptier: Class.extend({
       init: function($emptier){
-        $target = $($emptier.data('target'));
+        var $target = $($emptier.data('target'));
         $emptier.click(function(e){
           $target.empty();
         })
@@ -33,11 +33,11 @@ var initHooch = function(){
     }),
     HoverReveal: Class.extend({
       init: function($hover_revealer){
-        $revealable = $hover_revealer.data('revealable')
-        jq_obj.bind('mouseover',function(){
+        var $revealable = $hover_revealer.data('revealable')
+        $hover_revealer.bind('mouseover',function(){
           $revealable.show();
         });
-        jq_obj.bind('mouseout',function(){
+        $hover_revealer.bind('mouseout',function(){
           $revealable.hide();
         });
 
@@ -495,7 +495,7 @@ var initHooch = function(){
     }),
     Remover: Class.extend({
       init: function($remover){
-        $target = $($remover.data('target'));
+        var $target = $($remover.data('target'));
         $remover.click(function(e){
           $target.remove();
         })
