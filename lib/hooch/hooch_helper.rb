@@ -76,6 +76,22 @@ module Hooch
       end
     end
 
+    def revealer_option_attrs(id, trigger: nil, triggers: nil)
+      ''.tap do |attrs|
+        attrs.concat "data-revealer_id=#{id}"
+        attrs.concat " data-revealer-trigger=#{trigger}" if trigger.present?
+        attrs.concat " data-revealer-triggers=#{triggers}" if triggers.present?
+      end
+    end
+
+    def revealer_option(id, trigger: nil, triggers: nil)
+      {}.tap do |params|
+        params['data-revealer_id'] = id
+        params['data-revealer-trigger'] = trigger if trigger.present?
+        params['data-revealer-triggers'] = triggers if triggers.present?
+      end
+    end
+
     def click_proxy(target = nil)
       ''.tap do |attrs|
         attrs.concat "data-click-proxy=true"
