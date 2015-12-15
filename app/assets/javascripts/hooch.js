@@ -249,6 +249,8 @@ var initHooch = function(){
       },
       reveal: function(){
         var sanitized_value = this.$revealer.val();
+        if('true' == sanitized_value){ sanitized_value = true }
+        if('false' == sanitized_value){ sanitized_value = false }
         this.$children = [];
         var revealer = this;
         this.$all_children.each(function(){
