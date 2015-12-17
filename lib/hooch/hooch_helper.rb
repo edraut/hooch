@@ -12,7 +12,11 @@ module Hooch
 
     def tab_trigger(target_id, push_state: nil)
       attrs = 'data-tab-trigger=true data-tab-target-id=' + target_id
-      attrs += ' data-push-state=' + push_state if push_state.present?
+      if push_state.present?
+        attrs += ' data-push-state=' + push_state
+      else
+        attrs += ' data-push-state=' + target_id
+      end
       attrs
     end
 
