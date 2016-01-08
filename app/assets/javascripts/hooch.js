@@ -241,7 +241,7 @@ var initHooch = function(){
         var revealer = this;
         this.$revealer = $revealer;
         this.children_id = this.$revealer.data('revealer-children-id');
-        this.$all_children = $('[data-revealer_id="' + this.children_id + '"]');
+        this.$all_children = $('[data-revealer-id="' + this.children_id + '"]');
         $revealer.bind('change',function(){
           revealer.reveal();
         });

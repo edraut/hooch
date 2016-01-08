@@ -65,24 +65,26 @@ module Hooch
       attrs = "data-remover=true data-target=" + id
     end
 
-    def revealer(id, type: nil)
+    def revealer_attrs(id, type: nil, highlander: false)
       ''.tap do |attrs|
         attrs.concat "data-revealer=true data-revealer-children-id=#{id}"
         attrs.concat " data-sub-type=#{type}" if type.present?
+        attrs.concat " data-sub-type=FormFieldRevealer" if highlander
       end
     end
 
-    def revealer_hash(id, type: nil)
+    def revealer(id, type: nil, highlander: false)
       {}.tap do |params|
         params['data-revealer'] = true
         params['data-revealer-children-id'] = id
         params['data-sub-type'] = type if type.present?
+        params['data-sub-type'] = 'FormFieldRevealer' if highlander
       end
     end
 
     def revealer_option_attrs(id, trigger: nil, triggers: nil)
       ''.tap do |attrs|
-        attrs.concat "data-revealer_id=#{id}"
+        attrs.concat "data-revealer-id=#{id}"
         attrs.concat " data-revealer-trigger=#{trigger}" if trigger.present?
         attrs.concat " data-revealer-triggers=#{triggers}" if triggers.present?
       end
@@ -90,9 +92,15 @@ module Hooch
 
     def revealer_option(id, trigger: nil, triggers: nil)
       {}.tap do |params|
-        params['data-revealer_id'] = id
+        params['data-revealer-id'] = id
         params['data-revealer-trigger'] = trigger if trigger.present?
         params['data-revealer-triggers'] = triggers if triggers.present?
+      end
+    end
+
+    def revealer_target_attrs(id)
+      ''.tap do |attrs|
+        attrs.concat "data-revealer-target=#{id}"
       end
     end
 
