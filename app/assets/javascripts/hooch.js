@@ -102,13 +102,25 @@ var initHooch = function(){
         this.$collapser = $('[data-expand-id="' + $expandable.data('expand-id') + '"][data-collapser]');
         if(this.$collapser.length > 0){
           this.$collapser.each(function(){
-            expandable.collapsers.push(new hooch.Collapser($(this),expandable))
+            if($(this).data('hooch_collapser')){
+              var hooch_collapser = $(this).data('hooch_collapser')
+              expandable.collapsers.push(hooch_collapser)
+              hooch_collapser.addExpandable(expandable)
+            } else{
+              expandable.collapsers.push(new hooch.Collapser($(this),expandable))
+            }
           })
         }
         this.$expander = $('[data-expand-id="' + $expandable.data('expand-id') + '"][data-expander]');
         this.expanders = []
         this.$expander.each(function(){
-          expandable.expanders.push(new hooch.Expander($(this),expandable))
+          if($(this).data('hooch_expander')){
+            var hooch_expander = $(this).data('hooch_expander')
+            expandable.expanders.push(hooch_expander)
+            hooch_expander.addExpandable(expandable)
+          } else{
+            expandable.expanders.push(new hooch.Expander($(this),expandable))
+          }
         })
         this.initial_state = $expandable.data('expand-state');
         if(this.initial_state == 'expanded'){
@@ -175,10 +187,18 @@ var initHooch = function(){
     Expander: Class.extend({
       init: function($expander,target){
         this.$expander = $expander;
-        this.target = target;
+        this.$expander.data('hooch_expander', this);
+        this.targets = [target];
         this.expand_class = $expander.data('expand-class')
         this.collapse_class = $expander.data('collapse-class')
-        if($expander.data('fake-dropdown')){
+        this.bindTarget(target);
+      },
+      addExpandable: function(target){
+        this.targets.push(target)
+        this.bindTarget(target)
+      },
+      bindTarget: function(target){
+        if(this.$expander.data('fake-dropdown')){
           target.$expandable.on('click',function(){
             target.toggle();
           })
@@ -186,7 +206,7 @@ var initHooch = function(){
             target.collapse();
           })
         }
-        $expander.bind('click',function(){
+        this.$expander.bind('click',function(){
           target.toggle();
         })
       },
@@ -198,7 +218,7 @@ var initHooch = function(){
           if(this.collapse_class){
             this.$expander.removeClass(this.collapse_class)
           }
-        } else if(this.target.collapsers.length > 0) {
+        } else if(this.targets[0].collapsers.length > 0) {
           this.$expander.hide();
         }
       },
@@ -210,7 +230,7 @@ var initHooch = function(){
           if(this.collapse_class){
             this.$expander.addClass(this.collapse_class)
           }
-        } else if(this.target.collapsers.length > 0) {
+        } else if(this.targets[0].collapsers.length > 0) {
           this.$expander.show();
         }
       }
@@ -218,7 +238,13 @@ var initHooch = function(){
     Collapser: Class.extend({
       init: function($collapser,target){
         this.$collapser = $collapser;
+        this.$collapser.data('hooch_collapser', this);
         $collapser.bind('click',function(){
+          target.collapse();
+        })
+      },
+      addExpandable: function(target){
+        this.$collapser.bind('click',function(){
           target.collapse();
         })
       },

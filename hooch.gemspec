@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["edraut@gmail.com"]
   spec.summary       = %q{Tools for building a browser UI. Get the good stuff.}
   spec.description   = %q{Hooch provides tools for common UI patterns without any dom or css. You build the html and css you want, then add data-attributes to get behavior. Keep behavior independent of look-and-feel and you can build "anything**"(** within reason).}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/edraut/hooch/wiki"
   spec.license       = "MIT"
 
   spec.files         = Dir['Rakefile', '{app,lib}/**/*', 'README*', 'LICENSE*']
