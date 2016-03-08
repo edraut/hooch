@@ -276,4 +276,28 @@ describe("hooch", function() {
       expect(sorter.sort_elements.length).toEqual(3)
     })
   })
+
+  describe('BindKey', function(){
+    it('submits a form', function(){
+      var form = affix('form[data-bind-key="up"]')
+      var binder = new hooch.BindKey(form)
+      spyOn(form, 'submit')
+      binder.do_it_now({keyCode: 38})
+      expect(form.submit).toHaveBeenCalled();
+    })
+    it('clicks a link', function(){
+      var link = affix('a[data-bind-key="tab"][data-ajax-link="true"][data-ajax-target="some_div"]')
+      var binder = new hooch.BindKey(link)
+      spyOn(link, 'click')
+      binder.do_it_now({keyCode: 9})
+      expect(link.click).toHaveBeenCalled();
+    })
+    it("doesn't act on other keys", function(){
+      var form = affix('form[data-bind-key="down"]')
+      var binder = new hooch.BindKey(form)
+      spyOn(form, 'submit')
+      binder.do_it_now({keyCode: 38})
+      expect(form.submit).not.toHaveBeenCalled();
+    })
+  })
 });
