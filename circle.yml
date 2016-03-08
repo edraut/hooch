@@ -6,4 +6,4 @@ database:
     - ls
 dependencies:
   pre:
-    - npm install -g karma
+    - cd jasmine && npm install -g
