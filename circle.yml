@@ -5,7 +5,7 @@ database:
   override:
     - ls
 dependencies:
-  override:
+  pre:
     - cd jasmine && npm install
   cache_directories:
     - "jasmine/node_modules"
