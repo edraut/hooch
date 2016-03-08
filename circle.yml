@@ -1,6 +1,6 @@
 test:
   override:
-    - karma start
+    - cd jasmine && karma start
 database:
   override:
     - ls
