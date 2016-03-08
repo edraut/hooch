@@ -1090,71 +1090,71 @@ var initHooch = function(){
       }
     }),
     key_code_map: { // borrowed from jresig: https://github.com/jeresig/jquery.hotkeys
-          "backspace": 8,
-          "tab": 9,
-          "return": 10,
-          "return": 13,
-          "shift": 16,
-          "ctrl": 17,
-          "alt": 18,
-          "pause": 19,
-          "capslock": 20,
-          "esc": 27,
-          "space": 32,
-          "pageup": 33,
-          "pagedown": 34,
-          "end": 35,
-          "home": 36,
-          "left": 37,
-          "up": 38,
-          "right": 39,
-          "down": 40,
-          "insert": 45,
-          "del": 46,
-          ";": 59,
-          "=": 61,
-          "0": 96,
-          "1": 97,
-          "2": 98,
-          "3": 99,
-          "4": 100,
-          "5": 101,
-          "6": 102,
-          "7": 103,
-          "8": 104,
-          "9": 105,
-          "*": 106,
-          "+": 107,
-          "-": 109,
-          ".": 110,
-          "/": 111,
-          "f1": 112,
-          "f2": 113,
-          "f3": 114,
-          "f4": 115,
-          "f5": 116,
-          "f6": 117,
-          "f7": 118,
-          "f8": 119,
-          "f9": 120,
-          "f10": 121,
-          "f11": 122,
-          "f12": 123,
-          "numlock": 144,
-          "scroll": 145,
-          "-": 173,
-          ";": 186,
-          "=": 187,
-          ",": 188,
-          "-": 189,
-          ".": 190,
-          "/": 191,
-          "`": 192,
-          "[": 219,
-          "\\": 220,
-          "]": 221,
-          "'": 222
-        },
+      8: "backspace",
+      9: "tab",
+      10: "return",
+      13: "return",
+      16: "shift",
+      17: "ctrl",
+      18: "alt",
+      19: "pause",
+      20: "capslock",
+      27: "esc",
+      32: "space",
+      33: "pageup",
+      34: "pagedown",
+      35: "end",
+      36: "home",
+      37: "left",
+      38: "up",
+      39: "right",
+      40: "down",
+      45: "insert",
+      46: "del",
+      59: ";",
+      61: "=",
+      96: "0",
+      97: "1",
+      98: "2",
+      99: "3",
+      100: "4",
+      101: "5",
+      102: "6",
+      103: "7",
+      104: "8",
+      105: "9",
+      106: "*",
+      107: "+",
+      109: "-",
+      110: ".",
+      111: "/",
+      112: "f1",
+      113: "f2",
+      114: "f3",
+      115: "f4",
+      116: "f5",
+      117: "f6",
+      118: "f7",
+      119: "f8",
+      120: "f9",
+      121: "f10",
+      122: "f11",
+      123: "f12",
+      144: "numlock",
+      145: "scroll",
+      173: "-",
+      186: ";",
+      187: "=",
+      188: ",",
+      189: "-",
+      190: ".",
+      191: "/",
+      192: "`",
+      219: "[",
+      220: "\\",
+      221: "]",
+      222: "'"
+    },
     BindKey: Class.extend({
       init: function($bound_element){
         this.$bound_element = $bound_element
@@ -1164,19 +1164,23 @@ var initHooch = function(){
           console.log("Warning! Hooch key binder couldn't find a key name to bind")
           return
         }
-        this.key_code = hooch.key_code_map[this.key_name]
-        if(!this.key_code){
+        var key_binder = this
+        var codes = $.grep(Object.keys(hooch.key_code_map), function(code){return (hooch.key_code_map[code] == key_binder.key_name)})
+        if(codes.length < 1){
           console.log('Warning! Hooch key binder could not find a key to bind for the key name ' + this.key_name)
           return
         }
-        var key_binder = this
         $(window).on('keyup', function(e){key_binder.do_it_now(e)} )
       },
       do_it_now: function(e){
         var focussed_elem_name = document.activeElement.nodeName.toLowerCase()
-        if('textarea' != focussed_elem_name && ('input' != focussed_elem_name ||
+        if('textarea' != focussed_elem_name &&
+           'select' != focussed_elem_name &&
+          ('input' != focussed_elem_name ||
            'submit' == $(document.activeElement).prop('type'))){
-          if(this.key_code == e.keyCode){
+          var selected_key_name = hooch.key_code_map[e.keyCode]
+
+          if(this.key_name == selected_key_name){
             e.preventDefault
             switch(this.element_type){
               case 'a':
