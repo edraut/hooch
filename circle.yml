@@ -6,6 +6,4 @@ database:
     - ls
 dependencies:
   pre:
-    - cd jasmine && npm install
-  cache_directories:
-    - "jasmine/node_modules"
+    - npm install -g karma
