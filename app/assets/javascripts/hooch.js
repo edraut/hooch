@@ -1173,8 +1173,9 @@ var initHooch = function(){
         $(window).on('keyup', function(e){key_binder.do_it_now(e)} )
       },
       do_it_now: function(e){
-        if('input' != document.activeElement.nodeName.toLowerCase() ||
-           'submit' == $(document.activeElement).prop('type')){
+        var focussed_elem_name = document.activeElement.nodeName.toLowerCase()
+        if('textarea' != focussed_elem_name && ('input' != focussed_elem_name ||
+           'submit' == $(document.activeElement).prop('type'))){
           if(this.key_code == e.keyCode){
             e.preventDefault
             switch(this.element_type){

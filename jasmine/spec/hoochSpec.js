@@ -308,5 +308,14 @@ describe("hooch", function() {
       binder.do_it_now({keyCode: 38})
       expect(form.submit).not.toHaveBeenCalled();
     })
+    it("doesn't act if a textarea is focussed", function(){
+      var form = affix('form[data-bind-key="up"]')
+      var textarea = form.affix('textarea')
+      textarea.focus()
+      var binder = new hooch.BindKey(form)
+      spyOn(form, 'submit')
+      binder.do_it_now({keyCode: 38})
+      expect(form.submit).not.toHaveBeenCalled();
+    })
   })
 });
