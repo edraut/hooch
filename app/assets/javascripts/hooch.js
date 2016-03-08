@@ -1088,6 +1088,114 @@ var initHooch = function(){
       replaceWith: function($jq_obj){
         this.$sort_element.replaceWith($jq_obj)
       }
+    }),
+    key_code_map: { // borrowed from jresig: https://github.com/jeresig/jquery.hotkeys
+          "backspace": 8,
+          "tab": 9,
+          "return": 10,
+          "return": 13,
+          "shift": 16,
+          "ctrl": 17,
+          "alt": 18,
+          "pause": 19,
+          "capslock": 20,
+          "esc": 27,
+          "space": 32,
+          "pageup": 33,
+          "pagedown": 34,
+          "end": 35,
+          "home": 36,
+          "left": 37,
+          "up": 38,
+          "right": 39,
+          "down": 40,
+          "insert": 45,
+          "del": 46,
+          ";": 59,
+          "=": 61,
+          "0": 96,
+          "1": 97,
+          "2": 98,
+          "3": 99,
+          "4": 100,
+          "5": 101,
+          "6": 102,
+          "7": 103,
+          "8": 104,
+          "9": 105,
+          "*": 106,
+          "+": 107,
+          "-": 109,
+          ".": 110,
+          "/": 111,
+          "f1": 112,
+          "f2": 113,
+          "f3": 114,
+          "f4": 115,
+          "f5": 116,
+          "f6": 117,
+          "f7": 118,
+          "f8": 119,
+          "f9": 120,
+          "f10": 121,
+          "f11": 122,
+          "f12": 123,
+          "numlock": 144,
+          "scroll": 145,
+          "-": 173,
+          ";": 186,
+          "=": 187,
+          ",": 188,
+          "-": 189,
+          ".": 190,
+          "/": 191,
+          "`": 192,
+          "[": 219,
+          "\\": 220,
+          "]": 221,
+          "'": 222
+        },
+    BindKey: Class.extend({
+      init: function($bound_element){
+        this.$bound_element = $bound_element
+        this.element_type = $bound_element.get(0).nodeName.toLowerCase()
+        this.key_name = $bound_element.data('bind-key')
+        if(!this.key_name){
+          console.log("Warning! Hooch key binder couldn't find a key name to bind")
+          return
+        }
+        this.key_code = hooch.key_code_map[this.key_name]
+        if(!this.key_code){
+          console.log('Warning! Hooch key binder could not find a key to bind for the key name ' + this.key_name)
+          return
+        }
+        var key_binder = this
+        $(window).on('keyup', function(e){key_binder.do_it_now(e)} )
+      },
+      do_it_now: function(e){
+        if(this.key_code == e.keyCode){
+          e.preventDefault
+          switch(this.element_type){
+            case 'a':
+            if(this.$bound_element.data('ajax-target')){
+              this.$bound_element.click()
+            } else {
+              window.location = this.$bound_element.attr('href')
+            }
+            break;
+            case 'form':
+            this.$bound_element.submit()
+            break;
+            case 'input':
+              if('submit' == $this.$bound_element.prop('type')){
+                this.$bound_element.click()
+              }
+            default:
+            break;
+          }
+          return false
+        }
+      }
     })
   };
   hooch.SortPlaceholder = hooch.SortElement.extend({
@@ -1213,7 +1321,7 @@ var initHooch = function(){
       ['hover_overflow','hidey_button','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
         'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-select', 'select-action-changer',
-        'sorter'],'hooch');
+        'sorter','bind-key'],'hooch');
     window.any_time_manager.load();
   };
   hooch.pauseEvent = function(e){

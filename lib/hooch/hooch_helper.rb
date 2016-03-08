@@ -167,5 +167,13 @@ module Hooch
     def prevent_double_click_hash
       {"data-prevent-double-click" => true}
     end
+
+    def bind_key(key_name)
+      {"data-bind-key" => key_name}
+    end
+
+    def bind_key_attrs(key_name)
+      "data-bind-key=#{key_name}"
+    end
   end
 end
