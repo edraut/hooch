@@ -1173,27 +1173,30 @@ var initHooch = function(){
         $(window).on('keyup', function(e){key_binder.do_it_now(e)} )
       },
       do_it_now: function(e){
-        if(this.key_code == e.keyCode){
-          e.preventDefault
-          switch(this.element_type){
-            case 'a':
-            if(this.$bound_element.data('ajax-target')){
-              this.$bound_element.click()
-            } else {
-              window.location = this.$bound_element.attr('href')
-            }
-            break;
-            case 'form':
-            this.$bound_element.submit()
-            break;
-            case 'input':
-              if('submit' == $this.$bound_element.prop('type')){
+        if('input' != document.activeElement.nodeName.toLowerCase() ||
+           'submit' == $(document.activeElement).prop('type')){
+          if(this.key_code == e.keyCode){
+            e.preventDefault
+            switch(this.element_type){
+              case 'a':
+              if(this.$bound_element.data('ajax-target')){
                 this.$bound_element.click()
+              } else {
+                window.location = this.$bound_element.attr('href')
               }
-            default:
-            break;
+              break;
+              case 'form':
+              this.$bound_element.submit()
+              break;
+              case 'input':
+                if('submit' == $this.$bound_element.prop('type')){
+                  this.$bound_element.click()
+                }
+              default:
+              break;
+            }
+            return false
           }
-          return false
         }
       }
     })

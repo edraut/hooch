@@ -299,5 +299,14 @@ describe("hooch", function() {
       binder.do_it_now({keyCode: 38})
       expect(form.submit).not.toHaveBeenCalled();
     })
+    it("doesn't act if a non-submit input is focussed", function(){
+      var form = affix('form[data-bind-key="up"]')
+      var text_input = form.affix('input[type="text"]')
+      text_input.focus()
+      var binder = new hooch.BindKey(form)
+      spyOn(form, 'submit')
+      binder.do_it_now({keyCode: 38})
+      expect(form.submit).not.toHaveBeenCalled();
+    })
   })
 });
