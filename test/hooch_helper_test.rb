@@ -20,7 +20,7 @@ class HoochHelperTest < ActionView::TestCase
 
   it "generates tab trigger attrs" do
     attrs = tab_trigger('about')
-    attrs.must_equal 'data-tab-trigger=true data-tab-target-id=about'
+    attrs.must_equal 'data-tab-trigger=true data-tab-target-id=about data-push-state=about'
   end
 
   it "generates tab trigger attrs with push state" do
@@ -69,15 +69,20 @@ class HoochHelperTest < ActionView::TestCase
   end
 
   it "generates revealer attrs" do
-    attrs = revealer('drill_down', type: 'FormFieldRevealer')
-    attrs.must_equal "data-revealer=true data-revealer-children-id=drill_down data-sub-type=FormFieldRevealer"
+    attrs = revealer_attrs('drill_down', highlander: true)
+    attrs.must_equal 'data-revealer=true data-revealer-children-id="drill_down" data-sub-type=FormFieldRevealer'
   end
 
   it "generates a revealer hash" do
-    params = revealer_hash('drill_down', type: 'FormFieldRevealer')
+    params = revealer('drill_down', type: 'FormFieldRevealer')
     params['data-revealer'].must_equal true
     params['data-revealer-children-id'].must_equal 'drill_down'
     params['data-sub-type'].must_equal 'FormFieldRevealer'
+  end
+
+  it "generates revealer option attrs" do
+    attrs = revealer_option_attrs('drill_down', trigger: 'more than one word')
+    attrs.must_equal 'data-revealer-id=drill_down data-revealer-trigger="more than one word"'
   end
 
   it "generates click proxy attrs" do
@@ -109,7 +114,7 @@ class HoochHelperTest < ActionView::TestCase
 
   it "generates field filler attrs" do
     attrs = field_filler('#amount_field', '10.00')
-    attrs.must_equal 'data-field-filler=true data-target=#amount_field data-value=10.00'
+    attrs.must_equal 'data-field-filler=true data-target=#amount_field data-value="10.00"'
   end
 
   it "generates field filler params" do

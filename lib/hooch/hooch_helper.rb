@@ -67,10 +67,10 @@ module Hooch
 
     def revealer_attrs(id, type: nil, highlander: false)
       ''.tap do |attrs|
-        attrs.concat "data-revealer=true data-revealer-children-id=#{id}"
-        attrs.concat " data-sub-type=#{type}" if type.present?
+        attrs.concat "data-revealer=true data-revealer-children-id=\"#{id}\""
+        attrs.concat " data-sub-type=\"#{type}\"" if type.present?
         attrs.concat " data-sub-type=FormFieldRevealer" if highlander
-      end
+      end.html_safe
     end
 
     def revealer(id, type: nil, highlander: false)
@@ -85,9 +85,9 @@ module Hooch
     def revealer_option_attrs(id, trigger: nil, triggers: nil)
       ''.tap do |attrs|
         attrs.concat "data-revealer-id=#{id}"
-        attrs.concat " data-revealer-trigger=#{trigger}" if trigger.present?
-        attrs.concat " data-revealer-triggers=#{triggers}" if triggers.present?
-      end
+        attrs.concat " data-revealer-trigger=\"#{trigger}\"" if trigger.present?
+        attrs.concat " data-revealer-triggers=\"#{triggers}\"" if triggers.present?
+      end.html_safe
     end
 
     def revealer_option(id, trigger: nil, triggers: nil)
@@ -100,8 +100,8 @@ module Hooch
 
     def revealer_target_attrs(id)
       ''.tap do |attrs|
-        attrs.concat "data-revealer-target=#{id}"
-      end
+        attrs.concat "data-revealer-target=\"#{id}\""
+      end.html_safe
     end
 
     def click_proxy(target = nil)
@@ -136,8 +136,8 @@ module Hooch
       ''.tap do |attrs|
         attrs.concat 'data-field-filler=true'
         attrs.concat " data-target=#{target}"
-        attrs.concat " data-value=#{value}"
-      end
+        attrs.concat " data-value=\"#{value}\""
+      end.html_safe
     end
 
     def field_filler_hash(target, value)
@@ -173,7 +173,7 @@ module Hooch
     end
 
     def bind_key_attrs(key_name)
-      "data-bind-key=#{key_name}"
+      "data-bind-key=\"#{key_name}\"".html_safe
     end
   end
 end
