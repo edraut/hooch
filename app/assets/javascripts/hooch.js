@@ -282,7 +282,12 @@ var initHooch = function(){
         this.$all_children.each(function(){
           var triggers = $(this).data('revealer-triggers');
           if(triggers){
-            var revelation_triggers = eval('(' + triggers + ')');
+            trigger_prototype = typeof(triggers)
+            if(trigger_prototype.toLowerCase() == 'string'){
+              var revelation_triggers = eval('(' + triggers + ')');
+            } else {
+              revelation_triggers = triggers
+            }
             if($.inArray(sanitized_value,revelation_triggers) > -1){
               revealer.$children.push($(this));
             }

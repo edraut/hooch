@@ -86,7 +86,7 @@ module Hooch
       ''.tap do |attrs|
         attrs.concat "data-revealer-id=#{id}"
         attrs.concat " data-revealer-trigger=\"#{trigger}\"" if trigger.present?
-        attrs.concat " data-revealer-triggers=\"#{triggers}\"" if triggers.present?
+        attrs.concat " data-revealer-triggers='#{triggers.to_json}'" if triggers.present?
       end.html_safe
     end
 
