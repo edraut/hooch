@@ -626,8 +626,11 @@ var initHooch = function(){
       init: function($sorter){
         this.$sorter = $sorter
         $sorter.data('sorter',this)
-        this.width = $sorter.width()
-        this.getSortElements()
+        this.is_visible = $sorter.is(':visible')
+        if(this.is_visible){
+          this.setWidth();
+          this.getSortElements()
+        }
         var sorter = this
         $(window).on('mouseup', function(e){
           sorter.onMouseup();
@@ -638,7 +641,7 @@ var initHooch = function(){
         var observer = new MutationObserver(function(mutations) {
           sorter.handleMutations(mutations)
         });
-        var config = { childList: true, subtree: true };
+        var config = { childList: true, subtree: true, attributes: true };
         observer.observe($sorter[0], config);
       },
       onMousemove: function(e){
@@ -673,6 +676,19 @@ var initHooch = function(){
         if(pressed_element){
           pressed_element.unSetPressed()
         }
+        var sorter = this
+        setTimeout(function(){
+          if(!sorter.is_visible){
+            if(sorter.$sorter.is(':visible')){
+              sorter.setWidth();
+              sorter.getSortElements();
+            }
+          }
+        },1000)
+      },
+      setWidth: function(){
+        this.width = this.$sorter.width()
+        this.$sorter.css({width: this.width})
       },
       handleMutations: function(mutations){
         var sorter = this;
@@ -692,9 +708,11 @@ var initHooch = function(){
         });
       },
       getPressedElement: function(){
-        var possible_pressed_element = $.grep(this.sort_elements, function(sort_element,i){return sort_element.pressed})
-        if(possible_pressed_element.length > 0){
-          return possible_pressed_element[0]
+        if(this.sort_elements){
+          var possible_pressed_element = $.grep(this.sort_elements, function(sort_element,i){return sort_element.pressed})
+          if(possible_pressed_element.length > 0){
+            return possible_pressed_element[0]
+          }
         }
         return false
       },
@@ -989,10 +1007,11 @@ var initHooch = function(){
         this.sorter = sorter;
         this.$sort_element = $sort_element;
         this.old_position = $sort_element.css('position')
-        this.starting_width = this.$sort_element[0].style.height
-        this.starting_height = this.$sort_element[0].style.width
+        this.starting_width = this.$sort_element[0].style.width
+        this.starting_height = this.$sort_element[0].style.height
         this.starting_top = this.$sort_element[0].style.top
         this.starting_left = this.$sort_element[0].style.left
+        $sort_element.css({width: this.starting_width})
         if(typeof(window.getComputedStyle) == 'function'){
           var computed_style = window.getComputedStyle(this.$sort_element[0])
           this.width = parseInt(computed_style.width)
