@@ -627,7 +627,6 @@ var initHooch = function(){
         this.$sorter = $sorter
         $sorter.data('sorter',this)
         this.is_visible = $sorter.is(':visible')
-        this.allow_nested = typeof($sorter.data('allow-nested')) != 'undefined'
         if(this.is_visible){
           this.setWidth();
           this.getSortElements()
@@ -1022,22 +1021,12 @@ var initHooch = function(){
           this.height = this.$sort_element.height()
         }
         this.dragging = false
-        this.determineIfSortable();
-        if(this.sortable){
-          this.getDragHandle()
-          this.$sort_element.css({cursor: ''});
-          this.$drag_handle.css({cursor: 'move'});
-          var sort_element = this
-          this.$drag_handle.on('mousedown', $.proxy(sort_element.onMousedown, sort_element))
-          this.$sort_element.on('dragstart', function(e){hooch.pauseEvent(e); return false})
-        }
-      },
-      determineIfSortable: function(){
-        if(this.$sort_element.find('[data-sorter]').length > 0 && !this.sorter.allow_nested){
-          this.sortable = false
-        } else {
-          this.sortable = true
-        }
+        this.getDragHandle()
+        this.$sort_element.css({cursor: ''});
+        this.$drag_handle.css({cursor: 'move'});
+        var sort_element = this
+        this.$drag_handle.on('mousedown', $.proxy(sort_element.onMousedown, sort_element))
+        this.$sort_element.on('dragstart', function(e){hooch.pauseEvent(e); return false})
       },
       onMousedown: function(e){
         if(1 == e.which){
