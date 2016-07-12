@@ -627,6 +627,7 @@ var initHooch = function(){
         this.$sorter = $sorter
         $sorter.data('sorter',this)
         this.is_visible = $sorter.is(':visible')
+        this.allow_nested = typeof($sorter.data('allow-nested')) != 'undefined'
         if(this.is_visible){
           this.setWidth();
           this.getSortElements()
@@ -1032,7 +1033,7 @@ var initHooch = function(){
         }
       },
       determineIfSortable: function(){
-        if(this.$sort_element.find('[data-sorter]').length > 0){
+        if(this.$sort_element.find('[data-sorter]').length > 0 && !this.sorter.allow_nested){
           this.sortable = false
         } else {
           this.sortable = true
@@ -1050,7 +1051,7 @@ var initHooch = function(){
         this.pressed = false
       },
       getDragHandle: function(){
-        this.$drag_handle = this.$sort_element.find('[data-drag-handle]')
+        this.$drag_handle = this.$sort_element.findExclude('[data-drag-handle]','[data-sorter]')
         if(this.$drag_handle.length < 1){
           this.$drag_handle = this.$sort_element
         }
@@ -1361,6 +1362,18 @@ var initHooch = function(){
     if(e.preventDefault) e.preventDefault();
     e.cancelBubble=true;
     e.returnValue=false;
+  }
+  $.fn.findExclude = function( selector, mask, result )
+  {
+      result = typeof result !== 'undefined' ? result : new jQuery();
+      this.children().each( function(){
+          thisObject = jQuery( this );
+          if( thisObject.is( selector ) ) 
+              result.push( this );
+          if( !thisObject.is( mask ) )
+              thisObject.findExclude( selector, mask, result );
+      });
+      return result;
   }
   $(document).ready(function(){
     if(typeof window.any_time_manager === "undefined" && typeof window.loading_any_time_manager === "undefined"){
