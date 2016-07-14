@@ -25,7 +25,31 @@ describe("hooch", function() {
     $('[data-remover]').click();
     expect($('#my_div').length).toEqual(0);
   });
-
+  describe("Modal",function(){
+    it('displays content in a modal', function(){
+      var mask = affix('#hooch-mask')
+      mask.hide()
+      var modal = mask.affix('#hooch-modal')
+      var dismiss = modal.affix('#hooch-dismiss')
+      var content = modal.affix('#hooch-content')
+      var example_content = "This is some content to display in a modal. It has a unique id f82kd82ls."
+      var hooch_modal = new hooch.Modal(example_content)
+      expect(mask.is(':visible')).toBe(true)
+      expect(content.html()).toEqual(example_content)
+    });
+    it('dismisses a modal', function(){
+      var mask = affix('#hooch-mask')
+      mask.hide()
+      var modal = mask.affix('#hooch-modal')
+      var dismiss = modal.affix('#hooch-dismiss')
+      var content = modal.affix('#hooch-content')
+      var example_content = "This is some content to display in a modal. It has a unique id f82kd82ls."
+      var hooch_modal = new hooch.Modal(example_content)
+      expect(mask.is(':visible')).toBe(true)
+      hooch_modal.close()
+      expect(mask.is(':visible')).toBe(false)
+    })
+  });
   describe("Expander",function(){
     it('expands and collapses an element', function(){
       var expander = affix('[data-expander="true"][data-expand-id="my_expander"]')

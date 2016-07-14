@@ -91,6 +91,101 @@ var initHooch = function(){
         return changed;
       }
     }),
+    ModalTrigger: Class.extend({
+      init: function($modal_trigger){
+        this.$modal_content = $($modal_trigger.data('content-target'))
+        var modal_trigger = this
+        $modal_trigger.on('click', function(){
+          new hooch.Modal(modal_trigger.$modal_content.html())
+        })
+      }
+    }),
+    ModalDismisser: Class.extend({
+      init: function($dismisser,modal_mask){
+        var dismisser = this
+        this.modal_mask = modal_mask
+        $dismisser.css({cursor: 'pointer'})
+        $dismisser.on('click', function(){
+          dismisser.modal_mask.close()
+        })
+      }
+    }),
+    Modal: Class.extend({
+      init: function($modal_content){
+        this.$modal_content = $modal_content
+        this.setGeometry()
+        this.getMask()
+        this.getModal()
+        this.getDismisser()
+        this.getContentWrapper()
+        this.disableScroll()
+        this.$modal_mask.show()
+      },
+      setGeometry: function(){
+        this.margin = 30;
+        this.padding = 30;
+        this.mask_top = $(window).scrollTop()
+        this.mask_height = $(window).height()
+        this.modal_height = this.mask_height - (this.margin*2)
+      },
+      getMask: function(){
+        this.$modal_mask = $('#hooch-mask')
+        this.$modal_mask.css({height: this.mask_height + 'px', top: this.mask_top + 'px'})
+      },
+      getModal: function(){
+        this.$modal_element = this.$modal_mask.find('#hooch-modal')
+        this.$modal_element.css({'max-height': this.modal_height, 'margin-top': this.margin, 'margin-bottom': this.margin, 'padding-bottom': this.padding, 'padding-left': this.padding, 'padding-right': this.padding})        
+      },
+      getContentWrapper: function(){
+        this.$modal_content_wrapper = this.$modal_element.find('#hooch-content')
+        var content_height = this.modal_height - (this.padding*2)
+        this.$modal_content_wrapper.css({'overflow-y': 'scroll', 'max-height': content_height})
+        this.$modal_content_wrapper.html(this.$modal_content)        
+      },
+      getDismisser: function(){
+        this.$dismisser = this.$modal_mask.find('#hooch-dismiss')
+        this.dismisser = new hooch.ModalDismisser(this.$dismisser,this)
+      },
+      close: function(){
+        this.$modal_mask.hide()
+        this.$modal_content_wrapper.empty()
+        this.enableScroll()
+      },
+      disableScroll: function(){
+        var modal = this
+        modal.old_height = $('body')[0].style.height
+        modal.old_overflow = $('body')[0].style.overflow
+        $('body').css({height: '100%',overflow: 'hidden'})
+        $('body').on({
+          'mousewheel.hoochModalScroll DOMMouseScroll.hoochModalScroll': function(e) {
+            if(($(e.target).attr('id') == 'hooch-content') || ($(e.target).parents('#hooch-content').length > 0)){
+              var delta = e.originalEvent.wheelDelta
+              new_scrolltop = $('#hooch-content').scrollTop() + delta
+              $('#hooch-content').scrollTop(new_scrolltop)
+            }
+            e.preventDefault();
+          }
+        })
+        if (window.addEventListener){ // older FF
+          window.addEventListener('DOMMouseScroll', hooch.preventDefault, false)
+        }
+        window.onwheel = hooch.preventDefault; // modern standard
+        window.onmousewheel = document.onmousewheel = hooch.preventDefault; // older browsers, IE
+        window.ontouchmove  = hooch.preventDefault; // mobile
+        document.onkeydown  = hooch.preventDefaultForScrollKeys;
+      },
+      enableScroll: function(){
+        $('body').css({height: this.old_height, overflow: this.old_overflow})
+        $('body').off('.hoochModalScroll')
+        if (window.removeEventListener){
+          window.removeEventListener('DOMMouseScroll', hooch.preventDefault, false);
+        }
+        window.onmousewheel = document.onmousewheel = null; 
+        window.onwheel = null; 
+        window.ontouchmove = null;  
+        document.onkeydown = null;  
+      }
+    }),
     Expandable: Class.extend({
       init: function($expandable){
         var expandable = this;
@@ -1103,6 +1198,7 @@ var initHooch = function(){
         this.$sort_element.replaceWith($jq_obj)
       }
     }),
+    scroll_keys: {37: 1, 38: 1, 39: 1, 40: 1},
     key_code_map: { // borrowed from jresig: https://github.com/jeresig/jquery.hotkeys
       8: "backspace",
       9: "tab",
@@ -1168,6 +1264,18 @@ var initHooch = function(){
       220: "\\",
       221: "]",
       222: "'"
+    },
+    preventDefault: function(e) {
+      e = e || window.event;
+      if (e.preventDefault)
+        e.preventDefault();
+      e.returnValue = false;  
+    },
+    preventDefaultForScrollKeys: function(e) {
+      if (hooch.scroll_keys[e.keyCode]) {
+        hooch.preventDefault(e);
+        return false;
+      }
     },
     BindKey: Class.extend({
       init: function($bound_element){
@@ -1343,7 +1451,7 @@ var initHooch = function(){
       ['hover_overflow','hidey_button','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
         'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-select', 'select-action-changer',
-        'sorter','bind-key'],'hooch');
+        'sorter','bind-key','modal-trigger'],'hooch');
     window.any_time_manager.load();
   };
   hooch.pauseEvent = function(e){
