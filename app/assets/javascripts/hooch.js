@@ -130,20 +130,33 @@ var initHooch = function(){
       },
       getMask: function(){
         this.$modal_mask = $('#hooch-mask')
-        this.$modal_mask.css({height: this.mask_height + 'px', top: this.mask_top + 'px'})
+        this.$modal_mask.css({height: this.mask_height + 'px', top: this.mask_top + 'px',
+          position: 'absolute', 'z-index': 100000,
+          left: 0, right: 0, bottom: 0,
+          'background-color': 'rgba(0,0,0,0.5)'
+        })
       },
       getModal: function(){
         this.$modal_element = this.$modal_mask.find('#hooch-modal')
-        this.$modal_element.css({'max-height': this.modal_height, 'margin-top': this.margin, 'margin-bottom': this.margin, 'padding-bottom': this.padding, 'padding-left': this.padding, 'padding-right': this.padding})        
+        this.$modal_element.css({'max-height': this.modal_height,
+          'margin-top': this.margin, 'margin-bottom': this.margin,
+          'padding-bottom': this.padding, 'padding-left': this.padding, 'padding-right': this.padding,
+          position: 'relative', float: 'left', 'margin-left': '50%',
+          '-webkit-transform': 'translateX(-50%)',
+          '-moz-transform': 'translateX(-50%)',
+          '-ms-transform': 'translateX(-50%)',
+          '-o-transform': 'translateX(-50%)',
+          transform: 'translateX(-50%)'})
       },
       getContentWrapper: function(){
         this.$modal_content_wrapper = this.$modal_element.find('#hooch-content')
         var content_height = this.modal_height - (this.padding*2)
-        this.$modal_content_wrapper.css({'overflow-y': 'scroll', 'max-height': content_height})
+        this.$modal_content_wrapper.css({'overflow-y': 'scroll', 'max-height': content_height, position: 'relative', float: 'left'})
         this.$modal_content_wrapper.html(this.$modal_content)        
       },
       getDismisser: function(){
         this.$dismisser = this.$modal_mask.find('#hooch-dismiss')
+        this.$dismisser.css({position: 'relative', float: 'right', 'font-size': '22px', 'line-height': '30px'})
         this.dismisser = new hooch.ModalDismisser(this.$dismisser,this)
       },
       close: function(){
@@ -160,7 +173,7 @@ var initHooch = function(){
           'mousewheel.hoochModalScroll DOMMouseScroll.hoochModalScroll': function(e) {
             if(($(e.target).attr('id') == 'hooch-content') || ($(e.target).parents('#hooch-content').length > 0)){
               var delta = e.originalEvent.wheelDelta
-              new_scrolltop = $('#hooch-content').scrollTop() + delta
+              new_scrolltop = $('#hooch-content').scrollTop() - delta
               $('#hooch-content').scrollTop(new_scrolltop)
             }
             e.preventDefault();
