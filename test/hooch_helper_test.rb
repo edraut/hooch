@@ -33,6 +33,11 @@ class HoochHelperTest < ActionView::TestCase
     attrs.must_equal 'data-tab-id=about'
   end
 
+  it "generates modal_trigger attrs" do
+    attrs = modal_trigger('#privacy')
+    attrs.must_equal 'data-modal-trigger="true" data-content-target="#privacy"'
+  end
+
   it "generates expander attrs" do
     attrs = expander('see_more')
     attrs.must_equal "data-expander=true data-expand-id=see_more"
