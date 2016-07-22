@@ -152,7 +152,7 @@ var initHooch = function(){
         this.$modal_content_wrapper = this.$modal_element.find('#hooch-content')
         var content_height = this.modal_height - (this.padding*2)
         this.$modal_content_wrapper.css({'overflow-y': 'scroll', 'max-height': content_height, position: 'relative', float: 'left'})
-        this.$modal_content_wrapper.html(this.$modal_content)        
+        this.$modal_content_wrapper.html(this.$modal_content)
       },
       getDismisser: function(){
         this.$dismisser = this.$modal_mask.find('#hooch-dismiss')
@@ -193,10 +193,10 @@ var initHooch = function(){
         if (window.removeEventListener){
           window.removeEventListener('DOMMouseScroll', hooch.preventDefault, false);
         }
-        window.onmousewheel = document.onmousewheel = null; 
-        window.onwheel = null; 
-        window.ontouchmove = null;  
-        document.onkeydown = null;  
+        window.onmousewheel = document.onmousewheel = null;
+        window.onwheel = null;
+        window.ontouchmove = null;
+        document.onkeydown = null;
       }
     }),
     Expandable: Class.extend({
@@ -1282,7 +1282,7 @@ var initHooch = function(){
       e = e || window.event;
       if (e.preventDefault)
         e.preventDefault();
-      e.returnValue = false;  
+      e.returnValue = false;
     },
     preventDefaultForScrollKeys: function(e) {
       if (hooch.scroll_keys[e.keyCode]) {
@@ -1360,11 +1360,18 @@ var initHooch = function(){
     }
   });
   hooch.SelectActionChanger = hooch.FakeSelect.extend({
+    init: function($fake_select){
+      this.auto_submit = $fake_select.data('auto-submit');
+      this._super($fake_select);
+    },
     select: function(fake_option){
       var form = this.select_display.parents('form:first');
       form.attr('action', fake_option.select_value);
       this.select_display.html(fake_option.select_name);
       this.select_display.trigger('click');
+      if (this.auto_submit){
+        form.submit();
+      }
     }
   });
   hooch.FormFieldRevealer = hooch.Revealer.extend({
@@ -1478,7 +1485,7 @@ var initHooch = function(){
       result = typeof result !== 'undefined' ? result : new jQuery();
       this.children().each( function(){
           thisObject = jQuery( this );
-          if( thisObject.is( selector ) ) 
+          if( thisObject.is( selector ) )
               result.push( this );
           if( !thisObject.is( mask ) )
               thisObject.findExclude( selector, mask, result );
