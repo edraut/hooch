@@ -122,20 +122,33 @@ describe("hooch", function() {
     expect($('input').val()).toEqual('green');
   })
 
-  it('SelectActionChanger', function(){
-    var form = affix('form')
-    var fake_select = form.affix('[data-select-action-changer="search"]')
-    var fake_display = fake_select.affix('[data-select-display]')
-    var fake_option1 = fake_select.affix('[data-select-value="pretty/url"][data-select-name="Pretty Stuff"]')
-    var fake_option2 = fake_select.affix('[data-select-value="strong/url"][data-select-name="Strong Stuff"]')
-    $('[data-select-action-changer]').each(function(){new hooch.SelectActionChanger($(this))})
-    $('[data-select-value="pretty/url"]').click();
-    expect($('[data-select-display]').html()).toEqual('Pretty Stuff');
-    expect($('form').prop('action')).toMatch('pretty/url');
-    $('[data-select-value="strong/url"]').click();
-    expect($('[data-select-display]').html()).toEqual('Strong Stuff');
-    expect($('form').prop('action')).toMatch('strong/url');
-  })
+  describe('SelectActionChanger', function(){
+    it('change actions when select is changed', function(){
+      var form = affix('form')
+      var fake_select = form.affix('[data-select-action-changer="search"]')
+      var fake_display = fake_select.affix('[data-select-display]')
+      var fake_option1 = fake_select.affix('[data-select-value="pretty/url"][data-select-name="Pretty Stuff"]')
+      var fake_option2 = fake_select.affix('[data-select-value="strong/url"][data-select-name="Strong Stuff"]')
+      $('[data-select-action-changer]').each(function(){new hooch.SelectActionChanger($(this))})
+      $('[data-select-value="pretty/url"]').click();
+      expect($('[data-select-display]').html()).toEqual('Pretty Stuff');
+      expect($('form').prop('action')).toMatch('pretty/url');
+      $('[data-select-value="strong/url"]').click();
+      expect($('[data-select-display]').html()).toEqual('Strong Stuff');
+      expect($('form').prop('action')).toMatch('strong/url');
+    });
+
+    it('auto-submit', function(){
+      var form = affix('form');
+      var submitCallback = spyOn(form, 'submit');
+      var fake_select = form.affix('[data-select-action-changer="search"][data-auto-submit="true"]')
+      var fake_display = fake_select.affix('[data-select-display]')
+      var fake_option1 = fake_select.affix('[data-select-value="pretty/url"][data-select-name="Pretty Stuff"]')
+      $('[data-select-action-changer]').each(function(){new hooch.SelectActionChanger($(this))})
+      $('[data-select-value="pretty/url"]').click();
+      expect(form.submit).toHaveBeenCalled();
+    });
+  });
 
   it('Revealer', function(){
     var form = affix('form')
