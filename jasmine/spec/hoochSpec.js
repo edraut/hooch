@@ -140,13 +140,13 @@ describe("hooch", function() {
 
     it('auto-submit', function(){
       var form = affix('form');
-      var submitCallback = spyOn(form, 'submit');
       var fake_select = form.affix('[data-select-action-changer="search"][data-auto-submit="true"]')
       var fake_display = fake_select.affix('[data-select-display]')
       var fake_option1 = fake_select.affix('[data-select-value="pretty/url"][data-select-name="Pretty Stuff"]')
-      $('[data-select-action-changer]').each(function(){new hooch.SelectActionChanger($(this))})
+      var hoo = new hooch.SelectActionChanger(fake_select);
+      var submitCallback = spyOn(hoo, 'submitForm');
       $('[data-select-value="pretty/url"]').click();
-      expect(form.submit).toHaveBeenCalled();
+      expect(submitCallback).toHaveBeenCalled();
     });
   });
 

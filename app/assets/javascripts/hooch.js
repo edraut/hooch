@@ -1370,8 +1370,11 @@ var initHooch = function(){
       this.select_display.html(fake_option.select_name);
       this.select_display.trigger('click');
       if (this.auto_submit){
-        form.submit();
+        this.submitForm();
       }
+    },
+    submitForm: function(form){
+      form.submit();
     }
   });
   hooch.FormFieldRevealer = hooch.Revealer.extend({
