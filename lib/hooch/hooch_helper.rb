@@ -74,7 +74,10 @@ module Hooch
       ''.tap do |attrs|
         attrs.concat "data-revealer=true data-revealer-children-id=\"#{id}\""
         attrs.concat " data-sub-type=\"#{type}\"" if type.present?
-        attrs.concat " data-sub-type=FormFieldRevealer" if highlander
+        if highlander
+          attrs.concat " data-sub-type=FormFieldRevealer"
+          attrs.concat " data-revealer-highlander=\"true\""
+        end
       end.html_safe
     end
 
