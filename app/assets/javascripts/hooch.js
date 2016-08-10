@@ -373,9 +373,11 @@ var initHooch = function(){
     Revealer: Class.extend({
       init: function($revealer){
         var revealer = this;
-        this.$revealer = $revealer;
-        this.children_id = this.$revealer.data('revealer-children-id');
-        this.$all_children = $('[data-revealer-id="' + this.children_id + '"]');
+        this.$revealer          = $revealer;
+        this.children_id        = this.$revealer.data('revealer-children-id');
+        this.$all_children      = $('[data-revealer-id="' + this.children_id + '"]');
+        this.highlander         = $revealer.data('revealer-highlander');
+        this.$revelation_target = $('[data-revealer-target="' + this.children_id + '"]');
         this.bindEvent();
         revealer.reveal();
       },
@@ -409,8 +411,17 @@ var initHooch = function(){
       hideChildren: function(){
         this.$all_children.hide();
       },
+      hideFormChildren: function(){
+        this.$form = this.$revealer.parents('form:first')
+        if(this.$form.length > 0){
+          this.$form.after(this.$all_children)
+        }
+      },
       revealChosenOnes: function(){
         $.each(this.$children,function(){ $(this).show(); });
+      },
+      revealFormChosenOnes: function(){
+        this.$revelation_target.html(this.$children);
       },
       bindEvent: function(){
         var revealer = this;
@@ -1384,6 +1395,7 @@ var initHooch = function(){
   });
   hooch.FakeSelectRevealer = hooch.Revealer.extend({
     init: function($fake_select){
+      this.highlander     = $fake_select.data('revealer-highlander')
       this.select_display = $fake_select.find('[data-select-display]')
       this.real_select = $fake_select.find('input')
       var fake_select = this
@@ -1432,6 +1444,21 @@ var initHooch = function(){
       })
       this.hideChildren();
       this.revealChosenOnes();
+    },
+    hideChildren: function(){
+      this._super();
+      if (this.highlander){
+        this.$form = this.$revealer.parents('form:first')
+        if(this.$form.length > 0){
+          this.$form.after(this.$all_children)
+        }
+      }
+    },
+    revealChosenOnes: function(){
+      if (this.highlander){
+        this.$revelation_target.html(this.$children);
+      }
+      this._super();
     }
   });
   hooch.FormFieldRevealer = hooch.Revealer.extend({

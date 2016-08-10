@@ -73,8 +73,11 @@ module Hooch
     def revealer_attrs(id, type: nil, highlander: false)
       ''.tap do |attrs|
         attrs.concat "data-revealer=true data-revealer-children-id=\"#{id}\""
+        if highlander
+          attrs.concat " data-sub-type=FormFieldRevealer"
+          attrs.concat " data-revealer-highlander=\"true\""
+        end
         attrs.concat " data-sub-type=\"#{type}\"" if type.present?
-        attrs.concat " data-sub-type=FormFieldRevealer" if highlander
       end.html_safe
     end
 
