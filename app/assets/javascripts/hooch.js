@@ -376,8 +376,6 @@ var initHooch = function(){
         this.$revealer          = $revealer;
         this.children_id        = this.$revealer.data('revealer-children-id');
         this.$all_children      = $('[data-revealer-id="' + this.children_id + '"]');
-        this.highlander         = $revealer.data('revealer-highlander');
-        this.$revelation_target = $('[data-revealer-target="' + this.children_id + '"]');
         this.bindEvent();
         revealer.reveal();
       },
@@ -411,17 +409,8 @@ var initHooch = function(){
       hideChildren: function(){
         this.$all_children.hide();
       },
-      hideFormChildren: function(){
-        this.$form = this.$revealer.parents('form:first')
-        if(this.$form.length > 0){
-          this.$form.after(this.$all_children)
-        }
-      },
       revealChosenOnes: function(){
         $.each(this.$children,function(){ $(this).show(); });
-      },
-      revealFormChosenOnes: function(){
-        this.$revelation_target.html(this.$children);
       },
       bindEvent: function(){
         var revealer = this;
@@ -1395,7 +1384,6 @@ var initHooch = function(){
   });
   hooch.FakeSelectRevealer = hooch.Revealer.extend({
     init: function($fake_select){
-      this.highlander     = $fake_select.data('revealer-highlander')
       this.select_display = $fake_select.find('[data-select-display]')
       this.real_select = $fake_select.find('input')
       var fake_select = this
@@ -1403,6 +1391,9 @@ var initHooch = function(){
       $fake_select.find('[data-select-value][data-select-name]').each(function(){
         fake_select.select_options.push(new hooch.FakeOption($(this), fake_select));
       })
+      this.children_id        = $fake_select.data('revealer-children-id');
+      this.highlander         = $fake_select.data('revealer-highlander');
+      this.$revelation_target = $('[data-revealer-target="' + this.children_id + '"]');
       this._super($fake_select);
     },
     select: function(fake_option){
