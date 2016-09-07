@@ -3,7 +3,7 @@ test:
     - cd jasmine && ./node_modules/.bin/karma start
 database:
   override:
-    - ls
+    - ls -l ./node_modules/.bin/*
 dependencies:
   pre:
     - cd jasmine && npm install -g
