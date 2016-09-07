@@ -152,7 +152,7 @@ var initHooch = function(){
         this.$modal_content_wrapper = this.$modal_element.find('#hooch-content')
         var content_height = this.modal_height - (this.padding*2)
         this.$modal_content_wrapper.css({'overflow-y': 'scroll', 'max-height': content_height, position: 'relative', float: 'left'})
-        this.$modal_content_wrapper.html(this.$modal_content)        
+        this.$modal_content_wrapper.html(this.$modal_content)
       },
       getDismisser: function(){
         this.$dismisser = this.$modal_mask.find('#hooch-dismiss')
@@ -193,10 +193,10 @@ var initHooch = function(){
         if (window.removeEventListener){
           window.removeEventListener('DOMMouseScroll', hooch.preventDefault, false);
         }
-        window.onmousewheel = document.onmousewheel = null; 
-        window.onwheel = null; 
-        window.ontouchmove = null;  
-        document.onkeydown = null;  
+        window.onmousewheel = document.onmousewheel = null;
+        window.onwheel = null;
+        window.ontouchmove = null;
+        document.onkeydown = null;
       }
     }),
     Expandable: Class.extend({
@@ -373,12 +373,10 @@ var initHooch = function(){
     Revealer: Class.extend({
       init: function($revealer){
         var revealer = this;
-        this.$revealer = $revealer;
-        this.children_id = this.$revealer.data('revealer-children-id');
-        this.$all_children = $('[data-revealer-id="' + this.children_id + '"]');
-        $revealer.bind('change',function(){
-          revealer.reveal();
-        });
+        this.$revealer          = $revealer;
+        this.children_id        = this.$revealer.data('revealer-children-id');
+        this.$all_children      = $('[data-revealer-id="' + this.children_id + '"]');
+        this.bindEvent();
         revealer.reveal();
       },
       reveal: function(){
@@ -413,6 +411,12 @@ var initHooch = function(){
       },
       revealChosenOnes: function(){
         $.each(this.$children,function(){ $(this).show(); });
+      },
+      bindEvent: function(){
+        var revealer = this;
+        this.$revealer.bind('change',function(){
+          revealer.reveal();
+        });
       }
     }),
     TabGroup: Class.extend({
@@ -723,7 +727,8 @@ var initHooch = function(){
     FakeOption: Class.extend({
       init: function($fake_option,$fake_select){
         this.select_value = $fake_option.data('select-value')
-        this.select_name = $fake_option.data('select-name')
+        this.select_name  = $fake_option.data('select-name')
+        this.$fake_option = $fake_option
         var fake_option = this
         $fake_option.on('click',function(){
           $fake_select.select(fake_option)
@@ -1282,7 +1287,7 @@ var initHooch = function(){
       e = e || window.event;
       if (e.preventDefault)
         e.preventDefault();
-      e.returnValue = false;  
+      e.returnValue = false;
     },
     preventDefaultForScrollKeys: function(e) {
       if (hooch.scroll_keys[e.keyCode]) {
@@ -1360,11 +1365,91 @@ var initHooch = function(){
     }
   });
   hooch.SelectActionChanger = hooch.FakeSelect.extend({
+    init: function($fake_select){
+      this.auto_submit = $fake_select.data('auto-submit');
+      this._super($fake_select);
+    },
     select: function(fake_option){
       var form = this.select_display.parents('form:first');
       form.attr('action', fake_option.select_value);
       this.select_display.html(fake_option.select_name);
       this.select_display.trigger('click');
+      if (this.auto_submit){
+        this.submitForm();
+      }
+    },
+    submitForm: function(form){
+      form.submit();
+    }
+  });
+  hooch.FakeSelectRevealer = hooch.Revealer.extend({
+    init: function($fake_select){
+      this.select_display = $fake_select.find('[data-select-display]')
+      this.real_select = $fake_select.find('input')
+      var fake_select = this
+      this.select_options = []
+      $fake_select.find('[data-select-value][data-select-name]').each(function(){
+        fake_select.select_options.push(new hooch.FakeOption($(this), fake_select));
+      })
+      this.children_id        = $fake_select.data('revealer-children-id');
+      this.highlander         = $fake_select.data('revealer-highlander');
+      this.$revelation_target = $('[data-revealer-target="' + this.children_id + '"]');
+      this._super($fake_select);
+    },
+    select: function(fake_option){
+      this.select_display.html(fake_option.select_name);
+      this.real_select.val(fake_option.select_value);
+      this.select_display.trigger('click');
+    },
+    bindEvent: function(){
+      var revealer = this;
+      $.each(this.select_options, function(){
+        this.$fake_option.bind('click', function(){
+          revealer.reveal();
+        })
+      })
+    },
+    reveal: function(){
+      var sanitized_value = this.real_select.val()
+      if('true' == sanitized_value){ sanitized_value = true }
+      if('false' == sanitized_value){ sanitized_value = false }
+      this.$children = [];
+      var revealer = this;
+      this.$all_children.each(function(){
+        var triggers = $(this).data('revealer-triggers');
+        if(triggers){
+          trigger_prototype = typeof(triggers)
+          if(trigger_prototype.toLowerCase() == 'string'){
+            var revelation_triggers = eval('(' + triggers + ')');
+          } else {
+            revelation_triggers = triggers
+          }
+          if($.inArray(sanitized_value,revelation_triggers) > -1){
+            revealer.$children.push($(this));
+          }
+        } else {
+          if(sanitized_value == $(this).data('revealer-trigger')){
+            revealer.$children.push($(this));
+          }
+        }
+      })
+      this.hideChildren();
+      this.revealChosenOnes();
+    },
+    hideChildren: function(){
+      this._super();
+      if (this.highlander){
+        this.$form = this.$revealer.parents('form:first')
+        if(this.$form.length > 0){
+          this.$form.after(this.$all_children)
+        }
+      }
+    },
+    revealChosenOnes: function(){
+      if (this.highlander){
+        this.$revelation_target.html(this.$children);
+      }
+      this._super();
     }
   });
   hooch.FormFieldRevealer = hooch.Revealer.extend({
@@ -1478,7 +1563,7 @@ var initHooch = function(){
       result = typeof result !== 'undefined' ? result : new jQuery();
       this.children().each( function(){
           thisObject = jQuery( this );
-          if( thisObject.is( selector ) ) 
+          if( thisObject.is( selector ) )
               result.push( this );
           if( !thisObject.is( mask ) )
               thisObject.findExclude( selector, mask, result );

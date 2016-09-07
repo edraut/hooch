@@ -108,71 +108,51 @@ describe("hooch", function() {
     })
   });
   it('FakeSelect', function(){
-    var fake_select = affix('[data-fake-select="color"]')
-    var fake_display = fake_select.affix('[data-select-display]')
-    var fake_option1 = fake_select.affix('[data-select-value="blue"][data-select-name="Blue"]')
-    var fake_option2 = fake_select.affix('[data-select-value="green"][data-select-name="Green"]')
-    var real_input = fake_select.affix('input[type="hidden"][data-real-select="true"]')
-    $('[data-fake-select]').each(function(){new hooch.FakeSelect($(this))})
-    $('[data-select-value="blue"]').click();
-    expect($('[data-select-display]').html()).toEqual('Blue');
-    expect($('input').val()).toEqual('blue');
-    $('[data-select-value="green"]').click();
-    expect($('[data-select-display]').html()).toEqual('Green');
-    expect($('input').val()).toEqual('green');
+    it('acts as a fake select', function(){
+      FakeSelectTest("FakeSelect");
+    });
   })
 
-  it('SelectActionChanger', function(){
-    var form = affix('form')
-    var fake_select = form.affix('[data-select-action-changer="search"]')
-    var fake_display = fake_select.affix('[data-select-display]')
-    var fake_option1 = fake_select.affix('[data-select-value="pretty/url"][data-select-name="Pretty Stuff"]')
-    var fake_option2 = fake_select.affix('[data-select-value="strong/url"][data-select-name="Strong Stuff"]')
-    $('[data-select-action-changer]').each(function(){new hooch.SelectActionChanger($(this))})
-    $('[data-select-value="pretty/url"]').click();
-    expect($('[data-select-display]').html()).toEqual('Pretty Stuff');
-    expect($('form').prop('action')).toMatch('pretty/url');
-    $('[data-select-value="strong/url"]').click();
-    expect($('[data-select-display]').html()).toEqual('Strong Stuff');
-    expect($('form').prop('action')).toMatch('strong/url');
-  })
+  describe('FakeSelectRevealer', function(){
+    it('acts as a fake select', function(){
+      FakeSelectTest("FakeSelectRevealer");
+    });
+
+    it('acts a revealer', function(){
+      RevealerTest("FakeSelectRevealer");
+    })
+  });
+
+  describe('SelectActionChanger', function(){
+    it('change actions when select is changed', function(){
+      var form = affix('form')
+      var fake_select = form.affix('[data-select-action-changer="search"]')
+      var fake_display = fake_select.affix('[data-select-display]')
+      var fake_option1 = fake_select.affix('[data-select-value="pretty/url"][data-select-name="Pretty Stuff"]')
+      var fake_option2 = fake_select.affix('[data-select-value="strong/url"][data-select-name="Strong Stuff"]')
+      $('[data-select-action-changer]').each(function(){new hooch.SelectActionChanger($(this))})
+      $('[data-select-value="pretty/url"]').click();
+      expect($('[data-select-display]').html()).toEqual('Pretty Stuff');
+      expect($('form').prop('action')).toMatch('pretty/url');
+      $('[data-select-value="strong/url"]').click();
+      expect($('[data-select-display]').html()).toEqual('Strong Stuff');
+      expect($('form').prop('action')).toMatch('strong/url');
+    });
+
+    it('auto-submit', function(){
+      var form = affix('form');
+      var fake_select = form.affix('[data-select-action-changer="search"][data-auto-submit="true"]')
+      var fake_display = fake_select.affix('[data-select-display]')
+      var fake_option1 = fake_select.affix('[data-select-value="pretty/url"][data-select-name="Pretty Stuff"]')
+      var hoo = new hooch.SelectActionChanger(fake_select);
+      var submitCallback = spyOn(hoo, 'submitForm');
+      $('[data-select-value="pretty/url"]').click();
+      expect(submitCallback).toHaveBeenCalled();
+    });
+  });
 
   it('Revealer', function(){
-    var form = affix('form')
-    var master_select = form.affix('select[data-revealer="true"][data-sub-type="FormFieldRevealer"][data-revealer-children-id="kind"]')
-    var transaction = master_select.affix('option[value="Transaction"][selected="selected"]')
-    var monthly = master_select.affix('option[value="Monthly"]')
-
-    var child_target = form.affix('div[data-revealer-target="kind"]')
-
-    var all_options = form.affix('div[data-revealer-id="kind"][data-revealer-trigger="Transaction"]')
-    var all_select = all_options.affix('select')
-    var flat_amount = all_select.affix('option[value="flat"]')
-    var percentage = all_select.affix('option[value="percentage"]')
-
-    var flat_options = form.affix('div[data-revealer-id="kind"][data-revealer-trigger="Monthly"]')
-    var flat_select = flat_options.affix('select')
-    var flat_option = flat_select.affix('option[value="flat"]')
-
-    // FormFieldRevealer excercises all the functionality of Revealer plus some extra
-    var revealer = new hooch.FormFieldRevealer(master_select)
-
-    // The flat-only sub-select is hidden and outside the form
-    expect(flat_options.is(':visible')).toBe(false)
-    expect(form.find('[data-revealer-trigger="Transaction"]').length > 0).toBe(true)
-
-    // The all-options sub-select is visible and inside the form
-    expect(all_options.is(':visible')).toBe(true)
-    expect(form.find('[data-revealer-trigger="Monthly"]').length > 0).toBe(false)
-
-    // Change the master select and verify the sub-selects have changed correctly
-    master_select.val('Monthly')
-    revealer.reveal()
-
-    expect(flat_options.is(':visible')).toBe(true)
-    expect(form.find('[data-revealer-trigger="Transaction"]').length > 0).toBe(false)
-    expect(all_options.is(':visible')).toBe(false)
-    expect(form.find('[data-revealer-trigger="Monthly"]').length > 0).toBe(true)
+    RevealerTest("Revealer");
   })
 
   describe('Sorter',function(){
@@ -352,3 +332,64 @@ describe("hooch", function() {
     })
   })
 });
+
+
+
+function FakeSelectTest(class_name){
+  var class_name_dash = camelToDash(class_name);
+  var fake_select = affix('[data-' + class_name_dash + '="color"]')
+  var fake_display = fake_select.affix('[data-select-display]')
+  var fake_option1 = fake_select.affix('[data-select-value="blue"][data-select-name="Blue"]')
+  var fake_option2 = fake_select.affix('[data-select-value="green"][data-select-name="Green"]')
+  var real_input = fake_select.affix('input[type="hidden"][data-real-select="true"]')
+  $('[data-fake-select-revealer]').each(function(){new hooch[class_name]($(this))})
+  $('[data-select-value="blue"]').click();
+  expect($('[data-select-display]').html()).toEqual('Blue');
+  expect($('input').val()).toEqual('blue');
+  $('[data-select-value="green"]').click();
+  expect($('[data-select-display]').html()).toEqual('Green');
+  expect($('input').val()).toEqual('green');
+}
+
+function RevealerTest(class_name){
+  var class_name_dash = camelToDash(class_name);
+  var form = affix('form')
+  var master_select = form.affix('select[data-'+ class_name_dash +'="true"][data-sub-type="FormFieldRevealer"][data-revealer-children-id="kind"]')
+  var transaction = master_select.affix('option[value="Transaction"][selected="selected"]')
+  var monthly = master_select.affix('option[value="Monthly"]')
+
+  var child_target = form.affix('div[data-revealer-target="kind"]')
+
+  var all_options = form.affix('div[data-revealer-id="kind"][data-revealer-trigger="Transaction"]')
+  var all_select = all_options.affix('select')
+  var flat_amount = all_select.affix('option[value="flat"]')
+  var percentage = all_select.affix('option[value="percentage"]')
+
+  var flat_options = form.affix('div[data-revealer-id="kind"][data-revealer-trigger="Monthly"]')
+  var flat_select = flat_options.affix('select')
+  var flat_option = flat_select.affix('option[value="flat"]')
+
+  // FormFieldRevealer excercises all the functionality of Revealer plus some extra
+  var revealer = new hooch.FormFieldRevealer(master_select)
+
+  // The flat-only sub-select is hidden and outside the form
+  expect(flat_options.is(':visible')).toBe(false)
+  expect(form.find('[data-revealer-trigger="Transaction"]').length > 0).toBe(true)
+
+  // The all-options sub-select is visible and inside the form
+  expect(all_options.is(':visible')).toBe(true)
+  expect(form.find('[data-revealer-trigger="Monthly"]').length > 0).toBe(false)
+
+  // Change the master select and verify the sub-selects have changed correctly
+  master_select.val('Monthly')
+  revealer.reveal()
+
+  expect(flat_options.is(':visible')).toBe(true)
+  expect(form.find('[data-revealer-trigger="Transaction"]').length > 0).toBe(false)
+  expect(all_options.is(':visible')).toBe(false)
+  expect(form.find('[data-revealer-trigger="Monthly"]').length > 0).toBe(true)
+}
+
+function camelToDash(str) {
+    return str.replace(/\W+/g, '-').replace(/([a-z\d])([A-Z])/g, '$1-$2').toLowerCase();
+ }
