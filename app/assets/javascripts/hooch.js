@@ -560,6 +560,47 @@ var initHooch = function(){
         var new_state = {}
         new_state[key] = value
         this.state = $.extend(true, this.state, new_state);
+      },
+      addPath: function(new_path){
+        this.new_path = new_path
+      },
+      newPath: function(){
+        return [location.protocol, '//', location.host, this.new_path].join('');
+      },
+      addKeyValue: function(key,value){
+        this.addState(key,value)
+        history['replaceState'](this.state, null, this.toUrl());        
+      },
+      replacePath: function(new_path){
+        this.addPath(new_path)
+        history['replaceState']({}, null, this.newPath());        
+      }
+    }),
+    HistoryPusher: Class.extend({
+      init: function($history_pusher){
+        this.key = $history_pusher.data('key')
+        this.value = $history_pusher.data('value')
+        var history_pusher = this
+        $history_pusher.on('click', function(){
+          history_pusher.pushIt()
+        })
+      },
+      pushIt: function(){
+        this.current_state = new hooch.IhHistoryState(history.state)
+        this.current_state.addKeyValue(this.key,this.value)        
+      }
+    }),
+    HistoryReplacer: Class.extend({
+      init: function($history_replacer){
+        this.new_path = $history_replacer.data('new-path')
+        var history_replacer = this
+        $history_replacer.on('click', function(){
+          history_replacer.replaceIt()
+        })
+      },
+      replaceIt: function(){
+        this.current_state = new hooch.IhHistoryState(history.state)
+        this.current_state.replacePath(this.new_path)
       }
     }),
     GoProxy: Class.extend({
@@ -1549,7 +1590,7 @@ var initHooch = function(){
       ['hover_overflow','hidey_button','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
         'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-select', 'select-action-changer',
-        'sorter','bind-key','modal-trigger'],'hooch');
+        'sorter','bind-key','modal-trigger','history-pusher', 'history-replacer'],'hooch');
     window.any_time_manager.load();
   };
   hooch.pauseEvent = function(e){

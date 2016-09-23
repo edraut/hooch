@@ -331,6 +331,102 @@ describe("hooch", function() {
       expect(form.submit).not.toHaveBeenCalled();
     })
   })
+  describe('IhHistoryState', function(){
+    it('toQueryString', function(){
+      ih_history_state = new hooch.IhHistoryState({skeleton_key: 'treasure', foobar: 'baz'})
+      var query_string = ih_history_state.toQueryString()
+      expect(query_string).toEqual('skeleton_key=treasure&foobar=baz')
+    })
+    it('toUrl', function(){
+      ih_history_state = new hooch.IhHistoryState({skeleton_key: 'treasure', foobar: 'baz'})
+      var url = ih_history_state.toUrl()
+      expect(url).toEqual([location.protocol,'//',location.host,location.pathname,'?','skeleton_key=treasure&foobar=baz'].join(''))
+    })
+    it('addState', function(){
+      ih_history_state = new hooch.IhHistoryState({foobar: 'baz'})
+      ih_history_state.addState('skeleton_key','treasure')
+      var state = ih_history_state.state
+      expect(state.foobar).toEqual('baz') // We didn't mess with the original state
+      expect(state.skeleton_key).toEqual('treasure') // But we did add to it
+    })
+    it('addPath', function(){
+      ih_history_state = new hooch.IhHistoryState({skeleton_key: 'treasure', foobar: 'baz'})
+      ih_history_state.addPath('/my/new/path')
+      var new_path = ih_history_state.new_path
+      expect(new_path).toEqual('/my/new/path')
+    })
+    it('newPath', function(){
+      ih_history_state = new hooch.IhHistoryState({skeleton_key: 'treasure', foobar: 'baz'})
+      ih_history_state.addPath('/my/new/path')
+      expect(ih_history_state.newPath()).toEqual([location.protocol,'//',location.host,'/my/new/path'].join(''))
+    })
+    it('addKeyValue', function(){
+      ih_history_state = new hooch.IhHistoryState({skeleton_key: 'treasure', foobar: 'baz'})
+      history = {
+        state: {},
+        replaceState: function(state, throwaway, newpath){
+          new_state = state
+          new_path = newpath
+        }
+      }
+      ih_history_state.addKeyValue('my_key','my_value')
+      expect(new_state.my_key).toEqual('my_value')
+      expect(new_path).toEqual([location.protocol,'//',location.host,location.pathname,'?','skeleton_key=treasure&foobar=baz&my_key=my_value'].join(''))
+      delete history
+    })
+    it('replacePath', function(){
+      ih_history_state = new hooch.IhHistoryState({skeleton_key: 'treasure', foobar: 'baz'})
+      history = {
+        state: {},
+        replaceState: function(state, throwaway, newpath){
+          new_state = state
+          new_path = newpath
+        }
+      }
+      ih_history_state.replacePath('/my/new/path')
+      expect(Object.keys(new_state).length).toEqual(0)
+      expect(new_path).toEqual([location.protocol,'//',location.host,'/my/new/path'].join(''))
+      delete history
+    })
+  })
+  describe('HistoryPusher', function(){
+    it('adds params to the query string', function(){
+      var $link = affix('a[data-history-pusher="true"][data-key="my_key"][data-value="my_value"]')
+      var pusher = new hooch.HistoryPusher($link)
+      var new_state = null
+      var new_path = null
+      history = {
+        state: {},
+        replaceState: function(state, throwaway, newpath){
+          new_state = state
+          new_path = newpath
+        }
+      }
+      pusher.pushIt()
+      expect(new_state.my_key).toEqual('my_value')
+      expect(new_path).toEqual([location.protocol,'//',location.host,location.pathname,'?','my_key=my_value'].join(''))
+      delete history
+    })
+  })
+  describe('HistoryReplacer', function(){
+    it('replaces the path', function(){
+      var $link = affix('a[data-history-replacer="true"][data-new-path="/my/new/path"]')
+      var replacer = new hooch.HistoryReplacer($link)
+      var new_state = null
+      var new_path = null
+      history = {
+        state: {},
+        replaceState: function(state, throwaway, newpath){
+          new_state = state
+          new_path = newpath
+        }
+      }
+      replacer.replaceIt()
+      expect(Object.keys(new_state).length).toEqual(0)
+      expect(new_path).toEqual([location.protocol,'//',location.host,'/my/new/path'].join(''))
+      delete history
+    })
+  })
 });
 
 
