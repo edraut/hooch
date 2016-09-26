@@ -156,6 +156,36 @@ module Hooch
       end
     end
 
+    def history_pusher_attrs(key,value)
+      ''.tap do |attrs|
+        attrs.concat 'data-history-pusher=true'
+        attrs.concat " data-key=#{key}"
+        attrs.concat " data-value=\"#{value}\""
+      end.html_safe
+    end
+
+    def history_pusher(key,value)
+      {}.tap do |params|
+        params['data-history-pusher'] = true
+        params['data-key'] = key
+        params['data-value'] = value
+      end
+    end
+
+    def history_replacer_attrs(new_path)
+      ''.tap do |attrs|
+        attrs.concat 'data-history-replacer=true'
+        attrs.concat " data-new-path=#{new_path}"
+      end.html_safe
+    end
+
+    def history_replacer(new_path)
+      {}.tap do |params|
+        params['data-history-replacer'] = true
+        params['data-new-path'] = new_path
+      end
+    end
+
     def link
       "data-link=true"
     end

@@ -75,7 +75,7 @@ class HoochHelperTest < ActionView::TestCase
 
   it "generates revealer attrs" do
     attrs = revealer_attrs('drill_down', highlander: true)
-    attrs.must_equal 'data-revealer=true data-revealer-children-id="drill_down" data-sub-type=FormFieldRevealer'
+    attrs.must_equal 'data-revealer=true data-revealer-children-id="drill_down" data-sub-type=FormFieldRevealer data-revealer-highlander="true"'
   end
 
   it "generates a revealer hash" do
@@ -153,4 +153,32 @@ class HoochHelperTest < ActionView::TestCase
     params = prevent_double_click_hash
     params["data-prevent-double-click"].must_equal true
   end
+
+  it "generates history pusher attrs" do
+    attrs = history_pusher_attrs('my_key','my_value')
+    puts "history_pusher"
+    puts attrs
+    attrs.must_equal 'data-history-pusher=true data-key=my_key data-value="my_value"'
+  end
+
+  it "generates history_pusher params" do
+    params = history_pusher('my_key','my_value')
+    params["data-history-pusher"].must_equal true
+    params["data-key"].must_equal 'my_key'
+    params["data-value"].must_equal 'my_value'
+  end
+
+  it "generates history replacer attrs" do
+    attrs = history_replacer_attrs('/my/new/path')
+    puts "history_replacer"
+    puts attrs
+    attrs.must_equal 'data-history-replacer=true data-new-path=/my/new/path'
+  end
+
+  it "generates history_replacer params" do
+    params = history_replacer('/my/new/path')
+    params["data-history-replacer"].must_equal true
+    params["data-new-path"].must_equal '/my/new/path'
+  end
+
 end
