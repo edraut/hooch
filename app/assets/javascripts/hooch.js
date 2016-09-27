@@ -18,6 +18,15 @@ var initHooch = function(){
         this.targets.filter('[data-toggle_value="' + this.value + '"]').show();
       }
     }),
+    HideShow: Class.extend({
+      init: function($trigger){
+        this.$target = $($trigger.data('target'))
+        var trigger = this
+        $trigger.on('click', function(){
+          trigger.$target.toggle()
+        })
+      }
+    }),
     HoverOverflow: Class.extend({
       init: function(jq_obj){
         this.old_border = jq_obj.css('border-right');
@@ -1587,7 +1596,7 @@ var initHooch = function(){
       'expand-state' : 'Expandable', 'prevent-double-click' : 'PreventDoubleLinkClick'
     },'hooch');
     window.any_time_manager.registerList(
-      ['hover_overflow','hidey_button','submit-proxy','click-proxy','field-filler','revealer',
+      ['hover_overflow','hidey_button','hide-show','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
         'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-select', 'select-action-changer',
         'sorter','bind-key','modal-trigger','history-pusher', 'history-replacer'],'hooch');

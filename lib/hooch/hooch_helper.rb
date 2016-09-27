@@ -29,6 +29,18 @@ module Hooch
       attrs += " data-content-target=\"#{target}\""
     end
 
+    def hide_show(target)
+      {}.tap do |params|
+        params['data-hide-show'] = true
+        params['data-target'] = target
+      end
+    end
+
+    def hide_show_attrs(target)
+      attrs = "data-hide-show=true data-target=" + target
+      attrs
+    end
+
     def expander(id, expand_class: nil, collapse_class: nil)
       attrs = "data-expander=true data-expand-id=" + id
       attrs += " data-expand-class=" + expand_class if expand_class.present?
