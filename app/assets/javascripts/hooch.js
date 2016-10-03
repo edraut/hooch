@@ -20,19 +20,18 @@ var initHooch = function(){
     }),
     HideShow: Class.extend({
       init: function($trigger){
+        this.$trigger = $trigger
         this.$target = $($trigger.data('target'))
         var trigger = this
         if($trigger.data('any-click-closes')){
-          $(window).on('click',function(){
-            if(trigger.$target.is(':visible')){
+          $(window).on('click',function(e){
+            if(trigger.$target.is(':visible') && ($(e.target).data('target') != trigger.$trigger.data('target'))){
               trigger.$target.hide()
             }
           })
         }
         $trigger.on('click', function(e){
           trigger.$target.toggle()
-          e.preventDefault()
-          return false
         })
       }
     }),
