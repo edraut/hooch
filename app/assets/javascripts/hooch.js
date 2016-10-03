@@ -22,8 +22,17 @@ var initHooch = function(){
       init: function($trigger){
         this.$target = $($trigger.data('target'))
         var trigger = this
-        $trigger.on('click', function(){
+        if($trigger.data('any-click-closes')){
+          $(window).on('click',function(){
+            if(trigger.$target.is(':visible')){
+              trigger.$target.hide()
+            }
+          })
+        }
+        $trigger.on('click', function(e){
           trigger.$target.toggle()
+          e.preventDefault()
+          return false
         })
       }
     }),

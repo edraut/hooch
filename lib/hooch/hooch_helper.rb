@@ -29,15 +29,17 @@ module Hooch
       attrs += " data-content-target=\"#{target}\""
     end
 
-    def hide_show(target)
+    def hide_show(target, any_click_closes: false)
       {}.tap do |params|
         params['data-hide-show'] = true
         params['data-target'] = target
+        params['data-any-click-closes'] = true if any_click_closes
       end
     end
 
-    def hide_show_attrs(target)
+    def hide_show_attrs(target, any_click_closes: false)
       attrs = "data-hide-show=true data-target=" + target
+      attrs += " data-any-click-closes=true" if any_click_closes
       attrs
     end
 

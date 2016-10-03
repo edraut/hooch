@@ -156,8 +156,6 @@ class HoochHelperTest < ActionView::TestCase
 
   it "generates history pusher attrs" do
     attrs = history_pusher_attrs('my_key','my_value')
-    puts "history_pusher"
-    puts attrs
     attrs.must_equal 'data-history-pusher=true data-key=my_key data-value="my_value"'
   end
 
@@ -170,8 +168,6 @@ class HoochHelperTest < ActionView::TestCase
 
   it "generates history replacer attrs" do
     attrs = history_replacer_attrs('/my/new/path')
-    puts "history_replacer"
-    puts attrs
     attrs.must_equal 'data-history-replacer=true data-new-path=/my/new/path'
   end
 
