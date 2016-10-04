@@ -407,6 +407,25 @@ describe("hooch", function() {
       expect(new_path).toEqual([location.protocol,'//',location.host,location.pathname,'?','my_key=my_value'].join(''))
       delete history
     })
+    it('adds form data to the query string', function(){
+      var $form = affix('form[data-history-pusher="true"]')
+      var $input = $form.affix('input[type="text"][name="my_key"][value="my_value"]')
+      var $input = $form.affix('input[type="text"][name="my_key2"][value="my_value2"]')
+      var pusher = new hooch.HistoryPusher($form)
+      var new_state = null
+      var new_path = null
+      history = {
+        state: {},
+        replaceState: function(state, throwaway, newpath){
+          new_state = state
+          new_path = newpath
+        }
+      }
+      pusher.pushIt()
+      expect(new_state.my_key).toEqual('my_value')
+      expect(new_state.my_key2).toEqual('my_value2')
+      expect(new_path).toEqual([location.protocol,'//',location.host,location.pathname,'?','my_key=my_value&my_key2=my_value2'].join(''))
+    })
   })
   describe('HistoryReplacer', function(){
     it('replaces the path', function(){

@@ -170,19 +170,19 @@ module Hooch
       end
     end
 
-    def history_pusher_attrs(key,value)
+    def history_pusher_attrs(key = nil,value = nil)
       ''.tap do |attrs|
         attrs.concat 'data-history-pusher=true'
-        attrs.concat " data-key=#{key}"
-        attrs.concat " data-value=\"#{value}\""
+        attrs.concat " data-key=#{key}" if key
+        attrs.concat " data-value=\"#{value}\"" if value
       end.html_safe
     end
 
-    def history_pusher(key,value)
+    def history_pusher(key = nil,value = nil)
       {}.tap do |params|
         params['data-history-pusher'] = true
-        params['data-key'] = key
-        params['data-value'] = value
+        params['data-key'] = key if key
+        params['data-value'] = value if value
       end
     end
 

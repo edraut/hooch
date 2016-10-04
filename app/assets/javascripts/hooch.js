@@ -586,6 +586,9 @@ var initHooch = function(){
       },
       addKeyValue: function(key,value){
         this.addState(key,value)
+        this.setNewParams()
+      },
+      setNewParams: function(){
         history['replaceState'](this.state, null, this.toUrl());        
       },
       replacePath: function(new_path){
@@ -595,16 +598,64 @@ var initHooch = function(){
     }),
     HistoryPusher: Class.extend({
       init: function($history_pusher){
-        this.key = $history_pusher.data('key')
-        this.value = $history_pusher.data('value')
+        this.$history_pusher = $history_pusher
+        this.getPusherType()
         var history_pusher = this
-        $history_pusher.on('click', function(){
+        this.bindPusher()
+      },
+      bindPusher: function(){
+        var bind_method = 'bind' + this.pusher_type
+        this[bind_method]()
+      },
+      bindLink: function(){
+        var history_pusher = this
+        this.$history_pusher.on('click apiclick', function(){
           history_pusher.pushIt()
         })
       },
+      bindForm: function(){
+        var history_pusher = this
+        this.$history_pusher.on('submit apisubmit', function(){
+          history_pusher.pushIt()
+        })
+      },
+      getPusherType: function(){
+        switch(this.$history_pusher.get(0).nodeName.toLowerCase()){
+          case 'form':
+            this.pusher_type = 'Form'
+            break;
+          case 'a':
+          default:
+            this.pusher_type = 'Link'
+            break;
+        }
+      },
+      getNewParams: function(){
+        var get_params_method = 'get' + this.pusher_type + 'Params'
+        this[get_params_method]()
+      },
+      getFormParams: function(){
+        this.new_params = this.$history_pusher.serializeArray().
+          reduce(
+            function(obj, item) {
+              obj[item.name] = item.value;
+              return obj;
+            },
+            {}
+          );
+      },
+      getLinkParams: function(){
+        this.new_params = {}
+        this.new_params[this.$history_pusher.data('key')] = this.$history_pusher.data('value')
+      },
       pushIt: function(){
-        this.current_state = new hooch.IhHistoryState(history.state)
-        this.current_state.addKeyValue(this.key,this.value)        
+        this.getNewParams()
+        var history_pusher = this
+        history_pusher.current_state = new hooch.IhHistoryState(history.state)
+        $.each(this.new_params,function(new_key,new_value){
+          history_pusher.current_state.addState(new_key,new_value)        
+        })
+        history_pusher.current_state.setNewParams()
       }
     }),
     HistoryReplacer: Class.extend({
