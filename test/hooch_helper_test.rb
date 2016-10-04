@@ -157,6 +157,9 @@ class HoochHelperTest < ActionView::TestCase
   it "generates history pusher attrs" do
     attrs = history_pusher_attrs('my_key','my_value')
     attrs.must_equal 'data-history-pusher=true data-key=my_key data-value="my_value"'
+
+    form_attrs = history_pusher_attrs
+    form_attrs.must_equal 'data-history-pusher=true'
   end
 
   it "generates history_pusher params" do
@@ -164,6 +167,9 @@ class HoochHelperTest < ActionView::TestCase
     params["data-history-pusher"].must_equal true
     params["data-key"].must_equal 'my_key'
     params["data-value"].must_equal 'my_value'
+
+    form_params = history_pusher
+    form_params["data-history-pusher"].must_equal true
   end
 
   it "generates history replacer attrs" do
