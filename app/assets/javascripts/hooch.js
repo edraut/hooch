@@ -397,7 +397,7 @@ var initHooch = function(){
         revealer.reveal();
       },
       reveal: function(){
-        var sanitized_value = this.$revealer.val();
+        var sanitized_value = this.getSanitizedValue();
         if('true' == sanitized_value){ sanitized_value = true }
         if('false' == sanitized_value){ sanitized_value = false }
         this.$children = [];
@@ -419,9 +419,17 @@ var initHooch = function(){
               revealer.$children.push($(this));
             }
           }
-        })
+        });
         this.hideChildren();
         this.revealChosenOnes();
+      },
+      getSanitizedValue: function(){
+        if(this.$revealer[0].nodeName.toLowerCase() == "select"){
+          var sanitized_value = this.$revealer.val();
+        } else if(this.$revealer[0].nodeName.toLowerCase() == "input" && this.$revealer.attr('type') == "checkbox"){
+          var sanitized_value = this.$revealer.is(':checked');
+        }
+        return sanitized_value;
       },
       hideChildren: function(){
         this.$all_children.hide();
@@ -589,11 +597,11 @@ var initHooch = function(){
         this.setNewParams()
       },
       setNewParams: function(){
-        history['replaceState'](this.state, null, this.toUrl());        
+        history['replaceState'](this.state, null, this.toUrl());
       },
       replacePath: function(new_path){
         this.addPath(new_path)
-        history['replaceState']({}, null, this.newPath());        
+        history['replaceState']({}, null, this.newPath());
       }
     }),
     HistoryPusher: Class.extend({
@@ -653,7 +661,7 @@ var initHooch = function(){
         var history_pusher = this
         history_pusher.current_state = new hooch.IhHistoryState(history.state)
         $.each(this.new_params,function(new_key,new_value){
-          history_pusher.current_state.addState(new_key,new_value)        
+          history_pusher.current_state.addState(new_key,new_value)
         })
         history_pusher.current_state.setNewParams()
       }
