@@ -183,4 +183,17 @@ class HoochHelperTest < ActionView::TestCase
     params["data-new-path"].must_equal '/my/new/path'
   end
 
+  it "generates fake_checkbox_attrs" do
+    attrs = fake_checkbox_attrs('#target_form','like_candy','true')
+    attrs.must_equal 'data-fake-checkbox=true data-form-selector=#target_form data-field-name="like_candy" data-field-value="true"'
+  end
+
+  it "generates fake_checkbox hash" do
+    params = fake_checkbox('#target_form','like_candy',true)
+    params["data-fake-checkbox"].must_equal true
+    params["data-form-selector"].must_equal '#target_form'
+    params["data-field-name"].must_equal 'like_candy'
+    params["data-field-value"].must_equal true
+  end
+
 end

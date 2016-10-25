@@ -826,6 +826,44 @@ var initHooch = function(){
         window.location.href = reload_page;
       }
     }),
+    FakeCheckbox: Class.extend({
+      init: function($fake_checkbox){
+        this.$fake_checkbox = $fake_checkbox
+        this.$form = $($fake_checkbox.data('form-selector'))
+        this.$field = this.getField()
+        var fake_checkbox = this
+        this.$fake_checkbox.click(function(){ fake_checkbox.change() })
+      },
+      change: function(){
+        if(this.$fake_checkbox.hasClass('checked')){
+          this.$fake_checkbox.removeClass('checked')
+          this.removeValue();
+        } else {
+          this.$fake_checkbox.addClass('checked')
+          this.addValue();
+        }
+      },
+      getField: function(){
+        this.field_name = this.$fake_checkbox.data('field-name')
+        this.value = this.$fake_checkbox.data('field-value')
+        var field_selector = '[name="' + this.field_name +'"][value="' + this.value + '"]'
+        var $field
+        if(this.$form.find(field_selector).length > 0){
+          $field = this.$form.find(field_selector)
+          this.$fake_checkbox.addClass('checked')          
+        } else {
+          $field = $('<input type="hidden" name="' + this.field_name + '" value="' + this.value + '">')
+        }
+        return $field
+      },
+      addValue: function(){
+        console.log(this.$field)
+        this.$form.append(this.$field)
+      },
+      removeValue: function(){
+        this.$field.detach()
+      }
+    }),
     FakeSelect: Class.extend({
       init: function($fake_select){
         this.select_display = $fake_select.find('[data-select-display]')
@@ -1665,7 +1703,7 @@ var initHooch = function(){
     window.any_time_manager.registerList(
       ['hover_overflow','hidey_button','hide-show','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
-        'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-select', 'select-action-changer',
+        'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-checkbox', 'fake-select', 'select-action-changer',
         'sorter','bind-key','modal-trigger','history-pusher', 'history-replacer'],'hooch');
     window.any_time_manager.load();
   };

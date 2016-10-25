@@ -107,6 +107,48 @@ describe("hooch", function() {
       expect($('[data-expander]').css('display')).not.toEqual('none');
     })
   });
+  describe('FakeCheckbox', function(){
+    it('finds the target form', function(){
+      var $form = affix('form#target_form')
+      var $fake_checkbox = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"]')
+      var fake_checkbox = new hooch.FakeCheckbox($fake_checkbox)
+      expect(fake_checkbox.$form.attr('id')).toEqual('target_form')
+    });
+    it('finds a preëxisting target field', function(){
+      var $form = affix('form#target_form')
+      var $field = $form.affix('input[type="hidden"][name="like_candy"][value="true"]')
+      var $fake_checkbox = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"][data-field-name="like_candy"][data-field-value="true"]')
+      var fake_checkbox = new hooch.FakeCheckbox($fake_checkbox)
+      expect($fake_checkbox.hasClass('checked')).toBe(true)
+      expect(fake_checkbox.$field[0].nodeName.toLowerCase()).toEqual('input')
+      expect(fake_checkbox.$field.prop('type')).toEqual('hidden')
+      expect(fake_checkbox.$field.prop('name')).toEqual('like_candy')
+      expect(fake_checkbox.$field.prop('value')).toEqual('true')
+    });
+    it('creates a target field if none exists', function(){
+      var $form = affix('form#target_form')
+      var $fake_checkbox = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"][data-field-name="like_candy"][data-field-value="true"]')
+      var fake_checkbox = new hooch.FakeCheckbox($fake_checkbox)
+      expect($fake_checkbox.hasClass('checked')).toBe(false)
+      expect(fake_checkbox.$field[0].nodeName.toLowerCase()).toEqual('input')
+      expect(fake_checkbox.$field.prop('type')).toEqual('hidden')
+      expect(fake_checkbox.$field.prop('name')).toEqual('like_candy')
+      expect(fake_checkbox.$field.prop('value')).toEqual('true')
+    });
+    it("handles checking and unchecking the box", function(){
+      var $form = affix('form#target_form')
+      var $fake_checkbox = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"][data-form-selector="#target_form"][data-field-name="like_candy"][data-field-value="true"]')
+      var fake_checkbox = new hooch.FakeCheckbox($fake_checkbox)
+      expect($fake_checkbox.hasClass('checked')).toBe(false)
+      expect($form.find('input[type="hidden"][name="like_candy"][value="true"]').length).toEqual(0)
+      fake_checkbox.change()
+      expect($fake_checkbox.hasClass('checked')).toBe(true)
+      expect($form.find('input[type="hidden"][name="like_candy"][value="true"]').length).toEqual(1)
+      fake_checkbox.change()
+      expect($fake_checkbox.hasClass('checked')).toBe(false)
+      expect($form.find('input[type="hidden"][name="like_candy"][value="true"]').length).toEqual(0)
+    })
+  });
   it('FakeSelect', function(){
     it('acts as a fake select', function(){
       FakeSelectTest("FakeSelect");
