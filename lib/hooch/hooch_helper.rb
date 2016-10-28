@@ -154,21 +154,23 @@ module Hooch
       end
     end
 
-    def fake_checkbox_attrs(form_selector, field_name, field_value)
+    def fake_checkbox_attrs(form_selector, field_name, field_value, toggle_form: false)
       ''.tap do |attrs|
         attrs.concat 'data-fake-checkbox=true'
         attrs.concat " data-form-selector=#{form_selector}"
         attrs.concat " data-field-name=\"#{field_name}\""
         attrs.concat " data-field-value=\"#{field_value}\""
+        attrs.concat " data-toggle-form=\"#{toggle_form}\"" if toggle_form
       end.html_safe
     end
 
-    def fake_checkbox(form_selector, field_name, field_value)
+    def fake_checkbox(form_selector, field_name, field_value, toggle_form: false)
       {}.tap do |params|
         params['data-fake-checkbox'] = true
         params['data-form-selector'] = form_selector
         params['data-field-name'] = field_name
         params['data-field-value'] = field_value
+        params['data-toggle-form'] = toggle_form if toggle_form
       end
     end
 

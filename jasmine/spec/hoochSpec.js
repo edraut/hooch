@@ -137,7 +137,7 @@ describe("hooch", function() {
     });
     it("handles checking and unchecking the box", function(){
       var $form = affix('form#target_form')
-      var $fake_checkbox = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"][data-form-selector="#target_form"][data-field-name="like_candy"][data-field-value="true"]')
+      var $fake_checkbox = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"][data-field-name="like_candy"][data-field-value="true"]')
       var fake_checkbox = new hooch.FakeCheckbox($fake_checkbox)
       expect($fake_checkbox.hasClass('checked')).toBe(false)
       expect($form.find('input[type="hidden"][name="like_candy"][value="true"]').length).toEqual(0)
@@ -147,6 +147,39 @@ describe("hooch", function() {
       fake_checkbox.change()
       expect($fake_checkbox.hasClass('checked')).toBe(false)
       expect($form.find('input[type="hidden"][name="like_candy"][value="true"]').length).toEqual(0)
+    });
+    it("toggles form wrapper visibility", function(){
+      var $wrapper = affix('div#form_wrapper')
+      var $form = $wrapper.affix('form#target_form')
+      $wrapper.css('display','none')
+      expect($form.is(':visible')).toEqual(false)
+      var $fake_checkbox = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"][data-field-name="like_candy"][data-field-value="true"][data-toggle-form="#form_wrapper"]')
+      var $fake_checkbox2 = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"][data-field-name="like_veggies"][data-field-value="true"][data-toggle-form="#form_wrapper"]')
+      var fake_checkbox = new hooch.FakeCheckbox($fake_checkbox)
+      var fake_checkbox2 = new hooch.FakeCheckbox($fake_checkbox2)
+      expect($form.is(':visible')).toBe(false)
+      expect(!!$form.data('checked_fake_checkboxes')).toEqual(false)
+      // check both boxes
+      fake_checkbox.change()
+      fake_checkbox2.change()
+      expect($form.is(':visible')).toEqual(true)
+      expect($form.data('checked_fake_checkboxes').length).toEqual(2)
+
+      // uncheck one box
+      fake_checkbox.change()
+      expect($form.is(':visible')).toEqual(true)
+      expect($form.data('checked_fake_checkboxes').length).toEqual(1)
+
+      // uncheck the last box
+      fake_checkbox2.change()
+      expect($form.is(':visible')).toEqual(false)
+      expect($form.data('checked_fake_checkboxes').length).toEqual(0)
+    });
+    it("uses the form itself to toggle if not toggle target given", function(){
+      var $form = affix('form#target_form')
+      var $fake_checkbox = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"][data-field-name="like_candy"][data-field-value="true"][data-toggle-form=true]')
+      var fake_checkbox = new hooch.FakeCheckbox($fake_checkbox)
+      expect(fake_checkbox.$toggle_form.attr('id')).toEqual($form.attr('id'))
     })
   });
   it('FakeSelect', function(){

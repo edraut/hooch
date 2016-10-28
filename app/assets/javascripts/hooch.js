@@ -829,7 +829,7 @@ var initHooch = function(){
     FakeCheckbox: Class.extend({
       init: function($fake_checkbox){
         this.$fake_checkbox = $fake_checkbox
-        this.$form = $($fake_checkbox.data('form-selector'))
+        this.$form = this.getForm()
         this.$field = this.getField()
         var fake_checkbox = this
         this.$fake_checkbox.click(function(){ fake_checkbox.change() })
@@ -837,31 +837,86 @@ var initHooch = function(){
       change: function(){
         if(this.$fake_checkbox.hasClass('checked')){
           this.$fake_checkbox.removeClass('checked')
-          this.removeValue();
+          this.removeCheckedFromForm()
+          this.removeValue()
         } else {
           this.$fake_checkbox.addClass('checked')
-          this.addValue();
+          this.addCheckedToForm()
+          this.addValue()
         }
       },
       getField: function(){
         this.field_name = this.$fake_checkbox.data('field-name')
         this.value = this.$fake_checkbox.data('field-value')
-        var field_selector = '[name="' + this.field_name +'"][value="' + this.value + '"]'
+        this.field_selector = '[name="' + this.field_name +'"][value="' + this.value + '"]'
         var $field
-        if(this.$form.find(field_selector).length > 0){
-          $field = this.$form.find(field_selector)
-          this.$fake_checkbox.addClass('checked')          
+        if(this.$form.find(this.field_selector).length > 0){
+          $field = this.$form.find(this.field_selector)
+          this.$fake_checkbox.addClass('checked')
+          this.addCheckedToForm()
         } else {
           $field = $('<input type="hidden" name="' + this.field_name + '" value="' + this.value + '">')
         }
         return $field
       },
+      getForm: function(){
+        var form_selector = this.$fake_checkbox.data('form-selector')
+        var $form = $(form_selector)
+        if($form.length == 0){
+          console.log("WARNING: hooch.FakeCheckbox could not find the form with the selector '" + form_selector + "'")
+        }
+        var toggleable_selector = this.$fake_checkbox.data('toggle-form')
+        if(toggleable_selector == true || toggleable_selector == 'true'){
+          this.$toggle_form = $form
+        } else {
+          var $toggleable = $(toggleable_selector)
+          if($toggleable.length > 0){
+            this.$toggle_form = $toggleable
+          } else {
+            this.$toggle_form = false
+          }
+        }
+        return $form
+      },
       addValue: function(){
-        console.log(this.$field)
         this.$form.append(this.$field)
+        this.possiblyShowForm()
       },
       removeValue: function(){
         this.$field.detach()
+        this.possiblyHideForm()
+      },
+      possiblyShowForm: function(){
+        if(this.$toggle_form && this.$toggle_form.is(':hidden')){
+          this.$toggle_form.show()
+        }
+      },
+      possiblyHideForm: function(){
+        if(this.$toggle_form && this.$toggle_form.is(':visible') && this.formNoCheckedBoxes()){
+          this.$toggle_form.hide()
+        }
+      },
+      addCheckedToForm: function(){
+        if(this.$toggle_form){
+          var form_checkbox_list = this.$form.data('checked_fake_checkboxes')
+          if(form_checkbox_list){
+            form_checkbox_list.push(this.field_selector)
+            this.$form.data('checked_fake_checkboxes',form_checkbox_list)
+          } else {
+            this.$form.data('checked_fake_checkboxes',[this.field_selector])
+          }
+        }
+      },
+      removeCheckedFromForm: function(){
+        if(this.$toggle_form){
+          var form_checkbox_list = this.$form.data('checked_fake_checkboxes')
+          var fake_checkbox = this
+          var new_list = $.grep(form_checkbox_list, function(fs){return fs != fake_checkbox.field_selector})
+          this.$form.data('checked_fake_checkboxes',new_list)
+        }
+      },
+      formNoCheckedBoxes: function(){
+        return (!this.$form.data('checked_fake_checkboxes') || this.$form.data('checked_fake_checkboxes').length == 0)
       }
     }),
     FakeSelect: Class.extend({
