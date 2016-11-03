@@ -186,6 +186,8 @@ class HoochHelperTest < ActionView::TestCase
   it "generates fake_checkbox_attrs" do
     attrs = fake_checkbox_attrs('#target_form','like_candy','true')
     attrs.must_equal 'data-fake-checkbox=true data-form-selector=#target_form data-field-name="like_candy" data-field-value="true"'
+    attrs = fake_checkbox_attrs('#target_form','like_candy','true', toggle_form: '#form_wrapper')
+    attrs.must_equal 'data-fake-checkbox=true data-form-selector=#target_form data-field-name="like_candy" data-field-value="true" data-toggle-form="#form_wrapper"'
   end
 
   it "generates fake_checkbox hash" do
@@ -194,6 +196,14 @@ class HoochHelperTest < ActionView::TestCase
     params["data-form-selector"].must_equal '#target_form'
     params["data-field-name"].must_equal 'like_candy'
     params["data-field-value"].must_equal true
+    params.has_key?("data-toggle-form").must_equal false
+
+    params = fake_checkbox('#target_form','like_candy',true, toggle_form: '#form_wrapper')
+    params["data-fake-checkbox"].must_equal true
+    params["data-form-selector"].must_equal '#target_form'
+    params["data-field-name"].must_equal 'like_candy'
+    params["data-field-value"].must_equal true
+    params["data-toggle-form"].must_equal '#form_wrapper'
   end
 
 end
