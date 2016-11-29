@@ -6,4 +6,4 @@ database:
     - ls -l 
 dependencies:
   pre:
-    - cd jasmine && npm install karma karma-cli -g --save-dev
+    - cd jasmine && npm install -g --save-dev
