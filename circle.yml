@@ -1,9 +1,9 @@
 test:
   override:
-    - cd jasmine && karma start
+    - cd jasmine && ls -l && ls -l node_modules && ls -l node_modules/karma-cli/bin && node_modules/karma-cli/bin/karma start
 database:
   override:
     - ls -l 
 dependencies:
   pre:
-    - cd jasmine && npm install -g --save-dev
+    - cd jasmine && npm install
