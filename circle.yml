@@ -4,6 +4,3 @@ test:
 database:
   override:
     - ls -l 
-dependencies:
-  pre:
-    - cd jasmine && npm install --dev
