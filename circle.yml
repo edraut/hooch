@@ -1,6 +1,6 @@
 test:
   override:
-    - cd jasmine && ls -l && ls -l node_modules && ls -l node_modules/karma-cli/bin && node_modules/karma-cli/bin/karma start
+    - cd jasmine && node_modules/karma-cli/bin/karma start
 database:
   override:
     - ls -l 

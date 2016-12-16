@@ -1807,12 +1807,6 @@ var initHooch = function(){
     $('[data-link]').each(function(){
       new hooch.Link($(this));
     })
-    // Initailizes auto complete for select inputs
-    $('input,select,textarea').filter(':visible:enabled:first').each(function(){
-      if(!$(this).data('date-picker')){
-        $(this).focus();
-      }
-    });
   });
   $(window).bind("popstate", function(e){
     var previous_state = new hooch.IhHistoryState(e.originalEvent.state)
