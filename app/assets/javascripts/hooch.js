@@ -1759,7 +1759,7 @@ var initHooch = function(){
       ['hover_overflow','hidey_button','hide-show','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
         'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-checkbox', 'fake-select', 'select-action-changer',
-        'sorter','bind-key','modal-trigger','history-pusher', 'history-replacer'],'hooch');
+        'sorter','bind-key','modal-trigger','history-pusher', 'history-replacer', 'link'],'hooch');
     window.any_time_manager.load();
   };
   hooch.pauseEvent = function(e){
@@ -1803,9 +1803,6 @@ var initHooch = function(){
     })
     $('[data-disable_forms]').each(function(){
       new hooch.DisableForms($(this));
-    })
-    $('[data-link]').each(function(){
-      new hooch.Link($(this));
     })
   });
   $(window).bind("popstate", function(e){
