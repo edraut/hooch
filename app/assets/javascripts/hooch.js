@@ -1505,6 +1505,19 @@ var initHooch = function(){
         return false;
       }
     },
+    Atarget: Class.extend({
+      init: function($atarget){
+        $atarget.on('click', function(e) {
+          e.preventDefault();
+          var whichAnchor = $(this).attr('href');
+          if($(whichAnchor).length) {
+            $('html, body').animate({
+              scrollTop: $(whichAnchor).offset().top -90
+            }, 1000);
+          }
+        });
+      }
+    }),
     BindKey: Class.extend({
       init: function($bound_element){
         this.$bound_element = $bound_element
@@ -1759,7 +1772,7 @@ var initHooch = function(){
       ['hover_overflow','hidey_button','hide-show','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
         'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-checkbox', 'fake-select', 'select-action-changer',
-        'sorter','bind-key','modal-trigger','history-pusher', 'history-replacer', 'link'],'hooch');
+        'sorter','bind-key','modal-trigger','history-pusher', 'history-replacer', 'link', 'atarget'],'hooch');
     window.any_time_manager.load();
   };
   hooch.pauseEvent = function(e){
