@@ -928,7 +928,7 @@ var initHooch = function(){
         $fake_select.find('[data-select-value][data-select-name]').each(function(){
           fake_select.all_options.push(new hooch.FakeOption($(this), fake_select));
         })
-        if(this.real_select.val() != "" && typeof(this.real_select.val() != "undefined")){
+        if(this.real_select.val() != "" && typeof(this.real_select.val()) != "undefined"){
           this.initial_select(this.findOptionForValue(this.real_select.val()));
         }
       },
