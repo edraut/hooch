@@ -25,8 +25,8 @@ module Hooch
     end
 
     def modal_trigger(target)
-      attrs = 'data-modal-trigger="true"'
-      attrs += " data-content-target=\"#{target}\""
+      attrs = 'data-modal-trigger=true'
+      attrs += " data-content-target=#{target}"
     end
 
     def hide_show(target, any_click_closes: false)

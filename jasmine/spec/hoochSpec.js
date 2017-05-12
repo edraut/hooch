@@ -31,19 +31,19 @@ describe("hooch", function() {
       mask.hide()
       var modal = mask.affix('#hooch-modal')
       var dismiss = modal.affix('#hooch-dismiss')
-      var content = modal.affix('#hooch-content')
-      var example_content = "This is some content to display in a modal. It has a unique id f82kd82ls."
+      var example_content = affix('div')
+      example_content.html("This is some content to display in a modal. It has a unique id f82kd82ls.")
       var hooch_modal = new hooch.Modal(example_content)
       expect(mask.is(':visible')).toBe(true)
-      expect(content.html()).toEqual(example_content)
+      expect(modal.html().indexOf('This is some content to display') !== -1).toBe(true);
     });
     it('dismisses a modal', function(){
       var mask = affix('#hooch-mask')
       mask.hide()
       var modal = mask.affix('#hooch-modal')
       var dismiss = modal.affix('#hooch-dismiss')
-      var content = modal.affix('#hooch-content')
-      var example_content = "This is some content to display in a modal. It has a unique id f82kd82ls."
+      var example_content = affix('div')
+      example_content.html("This is some content to display in a modal. It has a unique id f82kd82ls.")
       var hooch_modal = new hooch.Modal(example_content)
       expect(mask.is(':visible')).toBe(true)
       hooch_modal.close()
