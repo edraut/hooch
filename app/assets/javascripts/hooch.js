@@ -903,17 +903,33 @@ var initHooch = function(){
     }),
     FakeSelect: Class.extend({
       init: function($fake_select){
+        this.all_options    = []
         this.select_display = $fake_select.find('[data-select-display]')
         this.real_select = $fake_select.find('input')
         var fake_select = this
         $fake_select.find('[data-select-value][data-select-name]').each(function(){
-          new hooch.FakeOption($(this),fake_select)
+          fake_select.all_options.push(new hooch.FakeOption($(this), fake_select));
         })
+        if(this.real_select.val() != "" && typeof(this.real_select.val()) != "undefined"){
+          this.initial_select(this.findOptionForValue(this.real_select.val()));
+        }
       },
-      select: function(fake_option){
+      initial_select: function(fake_option){
         this.select_display.html(fake_option.select_name);
         this.real_select.val(fake_option.select_value);
+      },
+      select: function(fake_option){
+        this.initial_select(fake_option);
         this.select_display.trigger('click');
+      },
+      findOptionForValue: function(value){
+        var selected_option
+        $.each(this.all_options, function(i, option){
+          if(option.select_value == value){
+            selected_option = option
+          }
+        });
+        return selected_option;
       }
     }),
     FakeOption: Class.extend({
@@ -922,7 +938,7 @@ var initHooch = function(){
         this.select_name  = $fake_option.data('select-name')
         this.$fake_option = $fake_option
         var fake_option = this
-        $fake_option.on('click',function(){
+        $fake_option.on('click', function(){
           $fake_select.select(fake_option)
         })
       }
@@ -1589,33 +1605,22 @@ var initHooch = function(){
   });
   hooch.FakeSelectRevealer = hooch.Revealer.extend({
     init: function($fake_select){
-      this.select_display = $fake_select.find('[data-select-display]')
-      this.real_select = $fake_select.find('input')
-      var fake_select = this
-      this.select_options = []
-      $fake_select.find('[data-select-value][data-select-name]').each(function(){
-        fake_select.select_options.push(new hooch.FakeOption($(this), fake_select));
-      })
+      this.fake_select = new hooch.FakeSelect($fake_select)
       this.children_id        = $fake_select.data('revealer-children-id');
       this.highlander         = $fake_select.data('revealer-highlander');
       this.$revelation_target = $('[data-revealer-target="' + this.children_id + '"]');
       this._super($fake_select);
     },
-    select: function(fake_option){
-      this.select_display.html(fake_option.select_name);
-      this.real_select.val(fake_option.select_value);
-      this.select_display.trigger('click');
-    },
     bindEvent: function(){
       var revealer = this;
-      $.each(this.select_options, function(){
+      $.each(this.fake_select.all_options, function(){
         this.$fake_option.bind('click', function(){
           revealer.reveal();
         })
       })
     },
     reveal: function(){
-      var sanitized_value = this.real_select.val()
+      var sanitized_value = this.fake_select.real_select.val()
       if('true' == sanitized_value){ sanitized_value = true }
       if('false' == sanitized_value){ sanitized_value = false }
       this.$children = [];
@@ -1640,6 +1645,9 @@ var initHooch = function(){
       })
       this.hideChildren();
       this.revealChosenOnes();
+    },
+    getSanitizedValue: function(){
+      return this.real_select.val();
     },
     hideChildren: function(){
       this._super();
