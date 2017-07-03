@@ -3,8 +3,22 @@ var initHooch = function(){
     Emptier: Class.extend({
       init: function($emptier){
         var $target = $($emptier.data('target'));
+        var emptier = this
+        var scroll_to_selector = $emptier.data('scroll-to')
+        if($(scroll_to_selector).length > 0){
+          this.scroll_to = $(scroll_to_selector)
+        }
         $emptier.click(function(e){
           $target.empty();
+          if(emptier.scroll_to){
+            if($('[data-hooch-offset]').length > 0){
+              extra_offset = $('[data-hooch-offset]').outerHeight()
+            }
+              $('html, body').animate({
+                scrollTop: emptier.scroll_to.offset().top - extra_offset
+              }, 300);
+
+          }
         })
       }
     }),
