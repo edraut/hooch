@@ -523,7 +523,9 @@ var initHooch = function(){
         var tab_trigger = this;
         $tab_trigger.on('click', function(e){
           e.preventDefault();
+          tab_trigger.$tab_trigger.trigger('tabTriggerClicked')
           tab_trigger.toggleTarget()
+          tab_trigger.$tab_trigger.trigger('tabLoaded')
         })
       },
       getTarget: function(){
