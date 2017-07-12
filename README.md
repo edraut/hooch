@@ -1,6 +1,6 @@
-# Hooch
+[![Build Status](https://semaphoreci.com/api/v1/invitedhome/hooch/branches/master/badge.svg)](https://semaphoreci.com/invitedhome/hooch)
 
-TODO: Write a gem description
+# Hooch
 
 ## Installation
 
@@ -20,7 +20,7 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+See the [Wiki](https://github.com/edraut/hooch/wiki)
 
 ## Contributing
 
