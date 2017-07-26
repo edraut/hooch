@@ -406,6 +406,54 @@ describe("hooch", function() {
       expect(form.submit).not.toHaveBeenCalled();
     })
   })
+  describe('TabGroup', function(){
+    it('activates the default tab', function(){
+      var $tab_group = affix('div[data-tab-group="sections"][data-default-tab="birds"]')
+      var $fish_trigger = $tab_group.affix('a[data-tab-trigger="true"][data-tab-target-id="fish"][data-push-state="fish"]')
+      var $bird_trigger = $tab_group.affix('a[data-tab-trigger="true"][data-tab-target-id="birds"][data-push-state="birds"]')
+      var $fish_content = affix('div[data-tab-id="fish"]')
+      $fish_content.html("All about fish.")
+      var $bird_content = affix('div[data-tab-id="birds"]')
+      $bird_content.html("All about birds.")
+      history = {
+        state: {},
+        replaceState: function(state, throwaway, newpath){
+          new_state = state
+          new_path = newpath
+        }
+      }
+      tab_group = new hooch.TabGroup($tab_group)
+      expect($bird_content.css('display')).not.toEqual('none');
+      expect($fish_content.css('display')).toEqual('none');
+      expect(new_state.sections).toEqual('birds')
+      delete history
+      delete new_state
+      delete new_path
+    })
+    it("doesn't change history if turned off", function(){
+      var $tab_group = affix('div[data-tab-group="sections"][data-default-tab="birds"][data-no-history="true"]')
+      var $fish_trigger = $tab_group.affix('a[data-tab-trigger="true"][data-tab-target-id="fish"][data-push-state="fish"]')
+      var $bird_trigger = $tab_group.affix('a[data-tab-trigger="true"][data-tab-target-id="birds"][data-push-state="birds"]')
+      var $fish_content = affix('div[data-tab-id="fish"]')
+      $fish_content.html("All about fish.")
+      var $bird_content = affix('div[data-tab-id="birds"]')
+      $bird_content.html("All about birds.")
+      history = {
+        state: {},
+        replaceState: function(state, throwaway, newpath){
+          new_state = state
+          new_path = newpath
+        }
+      }
+      tab_group = new hooch.TabGroup($tab_group)
+      expect($bird_content.css('display')).not.toEqual('none');
+      expect($fish_content.css('display')).toEqual('none');
+      expect(typeof new_state).toEqual('undefined')
+      delete history
+      delete new_state
+      delete new_path
+    })
+  })
   describe('IhHistoryState', function(){
     it('toQueryString', function(){
       ih_history_state = new hooch.IhHistoryState({skeleton_key: 'treasure', foobar: 'baz'})
@@ -448,6 +496,8 @@ describe("hooch", function() {
       expect(new_state.my_key).toEqual('my_value')
       expect(new_path).toEqual([location.protocol,'//',location.host,location.pathname,'?','skeleton_key=treasure&foobar=baz&my_key=my_value'].join(''))
       delete history
+      delete new_state
+      delete new_path
     })
     it('replacePath', function(){
       ih_history_state = new hooch.IhHistoryState({skeleton_key: 'treasure', foobar: 'baz'})
@@ -462,6 +512,8 @@ describe("hooch", function() {
       expect(Object.keys(new_state).length).toEqual(0)
       expect(new_path).toEqual([location.protocol,'//',location.host,'/my/new/path'].join(''))
       delete history
+      delete new_state
+      delete new_path
     })
   })
   describe('HistoryPusher', function(){

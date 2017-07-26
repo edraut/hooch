@@ -443,6 +443,7 @@ var initHooch = function(){
     TabGroup: Class.extend({
       init: function($tab_group){
         this.$tab_group = $tab_group;
+        this.getStateBehavior();
         this.getName();
         this.tab_triggers = [];
         this.tab_triggers_by_id = {};
@@ -477,9 +478,10 @@ var initHooch = function(){
         this.$content_parent = this.tab_triggers[0].getParent();
       },
       handleDefault: function(){
+
         if(this.$tab_group.data('default-tab')){
           this.default_tab = this.tab_triggers_by_id[this.$tab_group.data('default-tab')];
-          this.default_tab.toggleTarget('replace');
+          this.default_tab.toggleTarget(this.state_behavior);
         }
       },
       hideAll: function(trigger){
@@ -510,12 +512,20 @@ var initHooch = function(){
       },
       getActiveTab: function(){
         return this.active_tab;
+      },
+      getStateBehavior: function(){
+        if(this.$tab_group.data('no-history')){
+          this.state_behavior = 'no history'
+        } else {
+          this.state_behavior = 'replace'
+        }
       }
     }),
     TabTrigger: Class.extend({
       init: function($tab_trigger,tab_group){
         this.$tab_trigger = $tab_trigger;
         this.tab_group = tab_group;
+        this.state_behavior = this.tab_group.state_behavior
         this.tab_group_name = tab_group.name;
         this.tab_id = $tab_trigger.data('tab-target-id');
         this.getPushState();
@@ -536,20 +546,22 @@ var initHooch = function(){
           this.push_state = this.$tab_trigger.data('push-state')
         }
       },
-      toggleTarget: function(state_behavior){
+      toggleTarget: function(requested_state_behavior){
         var was_visible = this.$target.is(':visible');
         if(!was_visible){
           this.tab_group.setActiveTab(this);
           this.resize();
           var change_history = true;
           var history_method = 'pushState'
-          if('no history' == state_behavior){
+          if('no history' == requested_state_behavior || 'no history' == this.state_behavior){
             change_history = false
-          } else if('replace' == state_behavior){
+          } else if('replace' == requested_state_behavior){
             history_method = 'replaceState'
           }
           if (this.push_state && change_history) {
-            var current_state = new hooch.IhHistoryState(history.state)
+            var current_query = jQuery.extend(true, {}, hooch.beginning_params);
+            current_query = jQuery.extend(true, current_query, history.state);
+            var current_state = new hooch.IhHistoryState(current_query)
             current_state.addState(this.tab_group_name, this.push_state);
             history[history_method](current_state.state, null, current_state.toUrl());
           }
@@ -1787,6 +1799,21 @@ var initHooch = function(){
     e.cancelBubble=true;
     e.returnValue=false;
   }
+
+  //https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+  hooch.beginning_params = (function(a) {
+    if (a == "") return {};
+    var b = {};
+    for (var i = 0; i < a.length; ++i)
+    {
+        var p=a[i].split('=', 2);
+        if (p.length == 1)
+            b[p[0]] = "";
+        else
+            b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+    }
+    return b;
+  })(window.location.search.substr(1).split('&'));
   $.fn.findExclude = function( selector, mask, result )
   {
       result = typeof result !== 'undefined' ? result : new jQuery();
