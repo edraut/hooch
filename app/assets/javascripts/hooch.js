@@ -840,20 +840,27 @@ var initHooch = function(){
       init: function($fake_checkbox){
         this.$fake_checkbox = $fake_checkbox
         this.$form = this.getForm()
+        this.prepDeselectors()
         this.$field = this.getField()
         var fake_checkbox = this
         this.$fake_checkbox.click(function(){ fake_checkbox.change() })
       },
       change: function(){
         if(this.$fake_checkbox.hasClass('checked')){
-          this.$fake_checkbox.removeClass('checked')
-          this.removeCheckedFromForm()
-          this.removeValue()
+          this.deselect()
         } else {
-          this.$fake_checkbox.addClass('checked')
-          this.addCheckedToForm()
-          this.addValue()
+          this.select()
         }
+      },
+      deselect: function(){
+        this.$fake_checkbox.removeClass('checked')
+        this.removeCheckedFromForm()
+        this.removeValue()
+      },
+      select: function(){
+        this.$fake_checkbox.addClass('checked')
+        this.addCheckedToForm()
+        this.addValue()
       },
       getField: function(){
         this.field_name = this.$fake_checkbox.data('field-name')
@@ -887,6 +894,15 @@ var initHooch = function(){
           }
         }
         return $form
+      },
+      prepDeselectors: function(){
+        var $deselector = this.$form.find('[data-fake-deselector]')
+        var fake_checkbox = this
+        $deselector.on('click', function(){
+          if(fake_checkbox.$fake_checkbox.hasClass('checked')){
+            fake_checkbox.deselect()
+          }
+        })
       },
       addValue: function(){
         this.$form.append(this.$field)
