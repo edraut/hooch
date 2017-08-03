@@ -174,6 +174,18 @@ module Hooch
         params['data-toggle-form'] = toggle_form if toggle_form
       end
     end
+    
+    def fake_deselect
+      {}.tap do |params|
+        params['data-fake-deselector'] = true
+      end
+    end
+
+    def fake_deselect_attrs
+      ''.tap do |attrs|
+        attrs.concat 'data-fake-deselector=true'
+      end
+    end
 
     def field_filler(target, value)
       ''.tap do |attrs|

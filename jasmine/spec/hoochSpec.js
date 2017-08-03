@@ -175,11 +175,23 @@ describe("hooch", function() {
       expect($form.is(':visible')).toEqual(false)
       expect($form.data('checked_fake_checkboxes').length).toEqual(0)
     });
-    it("uses the form itself to toggle if not toggle target given", function(){
+    it("uses the form itself to toggle if no toggle target given", function(){
       var $form = affix('form#target_form')
       var $fake_checkbox = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"][data-field-name="like_candy"][data-field-value="true"][data-toggle-form=true]')
       var fake_checkbox = new hooch.FakeCheckbox($fake_checkbox)
       expect(fake_checkbox.$toggle_form.attr('id')).toEqual($form.attr('id'))
+    });
+    it("deselects all checkboxes", function(){
+      var $form = affix('form#target_form')
+      var $deselector = $form.affix('a[data-fake-deselector="true"]')
+      var $fake_checkbox = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"][data-field-name="like_candy"][data-field-value="true"][data-toggle-form=true]')
+      var fake_checkbox = new hooch.FakeCheckbox($fake_checkbox)
+      fake_checkbox.change()
+      expect($fake_checkbox.hasClass('checked')).toBe(true)
+      expect($form.is(':visible')).toEqual(true)
+      $deselector.trigger('click')
+      expect($fake_checkbox.hasClass('checked')).toBe(false)
+      expect($form.is(':visible')).toEqual(false)
     })
   });
   it('FakeSelect', function(){
