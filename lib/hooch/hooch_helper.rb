@@ -1,12 +1,13 @@
 module Hooch
   module HoochHelper
-    def tab_set(name, type: nil, default_tab: nil, no_history: nil)
+    def tab_set(name, type: nil, default_tab: nil, no_history: nil, preload_tabs: nil)
       if :ajax == type
         type = 'AjaxTabGroup'
       end
       attrs = 'data-tab-group=' + name
       attrs += ' data-sub-type=' + type if type.present?
       attrs += ' data-default-tab=' + default_tab if default_tab.present?
+      attrs += ' data-preload-tabs=' + preload_tabs if preload_tabs.present?
       attrs += ' data-no-history=true' if no_history.present?
       attrs
     end

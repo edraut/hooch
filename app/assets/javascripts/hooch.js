@@ -478,7 +478,6 @@ var initHooch = function(){
         this.$content_parent = this.tab_triggers[0].getParent();
       },
       handleDefault: function(){
-
         if(this.$tab_group.data('default-tab')){
           this.default_tab = this.tab_triggers_by_id[this.$tab_group.data('default-tab')];
           this.default_tab.toggleTarget(this.state_behavior);
@@ -1728,6 +1727,24 @@ var initHooch = function(){
     }
   });
   hooch.AjaxTabGroup = hooch.TabGroup.extend({
+    init: function($tab_group){
+      this._super($tab_group)
+      this.handlePreloads();
+    },
+    handlePreloads: function(){
+      var tab_group = this
+      var preload_tabs = this.$tab_group.data('preload-tabs');
+      if(preload_tabs){
+        var list_prototype = typeof(preload_tabs)
+        if(list_prototype.toLowerCase() == 'string'){
+          preload_tabs = eval('(' + preload_tabs + ')');
+        }
+        $.each(preload_tabs, function(i,preload_tab_id){
+          var preload_tab = tab_group.tab_triggers_by_id[preload_tab_id]
+          preload_tab.loadTarget();
+        })
+      }
+    },
     getTabTriggerClass: function(){
       this.tab_trigger_class = hooch.AjaxTabTrigger;
     }
@@ -1736,14 +1753,18 @@ var initHooch = function(){
     toggleTarget: function(pop){
       var tab_group = this.tab_group;
       if(!this.ajax_loaded){
-        this.ajax_loaded = true;
-        this.$tab_trigger.data('ajax-target','[data-tab-id="' + this.tab_id + '"]')
-        new thin_man.AjaxLinkSubmission(this.$tab_trigger,{'on_complete': function(){tab_group.resize()}});
+        this.loadTarget()
         this._super(pop);
       } else {
         this._super(pop);
         tab_group.resize()
       }
+    },
+    loadTarget: function(){
+      var tab_group = this.tab_group;
+      this.ajax_loaded = true;
+      this.$tab_trigger.data('ajax-target','[data-tab-id="' + this.tab_id + '"]')
+      new thin_man.AjaxLinkSubmission(this.$tab_trigger,{'on_complete': function(){tab_group.resize()}});
     },
     resize: function(){
       // noop
