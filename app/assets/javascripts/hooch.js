@@ -134,11 +134,17 @@ var initHooch = function(){
     ModalDismisser: Class.extend({
       init: function($dismisser,modal_mask){
         var dismisser = this
+        this.$dismisser = $dismisser;
+        hooch.dismisser = this
         this.modal_mask = modal_mask
         $dismisser.css({cursor: 'pointer'})
         $dismisser.on('click', function(){
-          dismisser.modal_mask.close()
+          dismisser.dismissModal()
         })
+      },
+      dismissModal: function(){
+        hooch.dismisser = null
+        this.modal_mask.close()
       }
     }),
     Modal: Class.extend({
@@ -147,6 +153,7 @@ var initHooch = function(){
         this.getMask()
         this.getDismisser()
         this.getContentWrapper()
+        this.attachDismisser()
         this.disableScroll()
         this.$modal_content.trigger('modalInitialized')
         this.$modal_mask.show()
@@ -162,14 +169,18 @@ var initHooch = function(){
         })
       },
       getContentWrapper: function(){
-        this.$modal_element = this.$modal_mask.find('#hooch-modal')
-        this.$modal_element.append(this.$modal_content)
+        this.$modal_wrapper = this.$modal_mask.find('#hooch-modal')
+        this.$modal_element = $('<div/>', {id: 'hooch_content', style: 'position: relative; float: left;'})
+        this.$modal_wrapper.html(this.$modal_element)
+        this.$modal_element.html(this.$modal_content)
         this.$modal_content.show()
       },
       getDismisser: function(){
         this.$dismisser = this.$modal_mask.find('#hooch-dismiss')
+      },
+      attachDismisser: function(){
+        this.$modal_wrapper.append(this.$dismisser)
         this.dismisser = new hooch.ModalDismisser(this.$dismisser,this)
-        this.$modal_content.append(this.$dismisser)
       },
       close: function(){
         this.$modal_mask.hide()
@@ -212,6 +223,11 @@ var initHooch = function(){
         document.onkeydown = null;
       }
     }),
+    closeModal: function(){
+      if(hooch.dismisser){
+        hooch.dismisser.dismissModal()
+      }
+    },
     Expandable: Class.extend({
       init: function($expandable){
         var expandable = this;
@@ -1835,8 +1851,12 @@ var initHooch = function(){
     if(e.preventDefault) e.preventDefault();
     e.cancelBubble=true;
     e.returnValue=false;
-  }
-
+  };
+  hooch.isTouchDevice = function(){
+    var el = document.createElement('div');
+    el.setAttribute('ongesturestart', 'return;');
+    return typeof el.ongesturestart === "function";
+  };
   //https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
   hooch.beginning_params = (function(a) {
     if (a == "") return {};
