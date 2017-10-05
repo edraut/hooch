@@ -1047,6 +1047,9 @@ var initHooch = function(){
       init: function($sorter){
         this.$sorter = $sorter
         $sorter.data('sorter',this)
+        var new_uuid = new UUID
+        this.uniq_id = new_uuid.value
+        this.created_at = new Date()
         this.is_visible = $sorter.is(':visible')
         if(this.is_visible){
           this.setWidth()
@@ -1056,57 +1059,13 @@ var initHooch = function(){
         this.startInactivityRefresh()
         var sorter = this
         $(window).on('mouseup touchend touchcancel', function(e){
-          sorter.onMouseup();
+          sorter.onMouseup(e);
         });
-        $(window).on('mousemove touchmove', function(e){
-          sorter.onMousemove(e)
-        })
         var observer = new MutationObserver(function(mutations) {
           sorter.handleMutations(mutations)
         });
         var config = { childList: true, subtree: true, attributes: true };
         observer.observe($sorter[0], config);
-      },
-      onMousemove: function(e){
-        if(this.dragging_element){
-          this.handleMouseMove(e)
-        } else {
-          var pressed_element = this.getPressedElement()
-          if(pressed_element) {
-            pressed_element.setDraggingAttached()
-            this.handleMouseMove(e)
-          }
-        }
-        return true
-      },
-      handleMouseMove: function(e){
-        hooch.pauseEvent(e)
-        this.redrawDraggingElement(e);
-        this.refreshSequence(e)
-        return false
-      },
-      onMouseup: function(){
-        if(this.dragging_element){
-          var tmp_dragging_element = this.dragging_element
-          this.removeDraggingElement()
-          if(tmp_dragging_element.dragging){
-            this.sendSort()
-          }
-          tmp_dragging_element.dragging = false
-        }
-        var pressed_element = this.getPressedElement()
-        if(pressed_element){
-          pressed_element.unSetPressed()
-        }
-        var sorter = this
-        setTimeout(function(){
-          if(!sorter.is_visible){
-            if(sorter.$sorter.is(':visible')){
-              sorter.setWidth();
-              sorter.getSortElements();
-            }
-          }
-        },1000)
       },
       usePolymorphicId: function(){
         if(this.$sorter.data('polymorphic-id')){
@@ -1137,6 +1096,17 @@ var initHooch = function(){
             }
           }
         });
+      },
+      onMouseup: function(e){ // If some user action caused a sorter to become visible, set things up
+        var sorter = this
+        setTimeout(function(){
+          if(!sorter.is_visible){
+            if(sorter.$sorter.is(':visible')){
+              sorter.setWidth();
+              sorter.getSortElements();
+            }
+          }
+        },1000)
       },
       getPressedElement: function(){
         if(this.sort_elements){
@@ -1207,19 +1177,23 @@ var initHooch = function(){
         this.row_keys = Object.keys(this.rows).map(function(val,i){return parseFloat(val)}).sort(sorter.numberSort)
         $.each(this.rows, function(row_key,row){row.sort(sorter.elementHorizontalSort)})
       },
-      redrawDraggingElement: function(e){
-        this.dragging_element.setPosition(e);
+      draggingElementForGrid: function(){
+        if(this.dragging_element){
+          if(this.dragging_element.dragging){
+            return this.dragging_element.placeholder
+          } else {
+            return this.dragging_element
+          }
+        }
+        return nil
       },
       refreshSequence: function(){
         var target_location = this.dragging_element.getCenter()
         var refresh_method = this['refreshSequence' + this.mode]
         refresh_method.call(this, target_location)
       },
-      insertElementAtPosition: function(element,e){
-        var target_location = element.getCenter()
+      insertDraggingElement: function(element,e){
         this.dragging_element = element
-        var refresh_method = this['refreshSequence' + this.mode]
-        refresh_method.call(this, target_location)
       },
       refreshSequenceGrid: function(target_location){
         var dragging_element = this.dragging_element
@@ -1261,13 +1235,12 @@ var initHooch = function(){
             var first_key = this.row_keys[0]
             var first_element = this.rows[first_key][0]
             first_element.$sort_element.before(dragging_element.placeholder.$sort_element)
-            this.refreshGrid()
           } else if('empty' == hovered_element){
             this.$sorter.html(dragging_element.placeholder.$sort_element)
           } else {
             hovered_element.$sort_element.after(dragging_element.placeholder.$sort_element)
-            this.refreshGrid()
           }
+          this.refreshGrid()
         }
       },
       rowAfter: function(row){
@@ -1416,17 +1389,15 @@ var initHooch = function(){
         current_row.push(sort_element.placeholder)
         this.refreshGrid();
       },
-      clearDraggingElement: function(){
-        if(this.dragging_element){
-          this.removeDraggingElement()
-        }
+      dropDraggingElement: function(){
+        this.reinsertDraggingElement()
+        this.sendSort()
       },
-      removeDraggingElement: function(){
+      reinsertDraggingElement: function(){
         if(this.dragging_element){
-          var placeholder_row = this.removePlaceholder()
-          this.rows[placeholder_row].push(this.dragging_element)
+          this.rows[this.placeholderRowKey()].push(this.dragging_element)
           this.dragging_element.drop()
-          this.dragging_element = undefined;
+          delete this.dragging_element
           this.refreshGrid();
         }
       },
@@ -1459,12 +1430,12 @@ var initHooch = function(){
         }
         return form_data
       },
-      removePlaceholder: function(){
+      placeholderRowKey: function(){
         var sorter = this
         return $.grep(this.row_keys, function(row_key,i){
           var placeholder_index = sorter.rows[row_key].indexOf(sorter.dragging_element.placeholder)
           if(placeholder_index > -1){
-            sorter.rows[row_key].slice(placeholder_index,1)
+            sorter.rows[row_key].splice(placeholder_index,1)
             return true
           }
           return false
@@ -1558,6 +1529,9 @@ var initHooch = function(){
     }),
     SortElement: Class.extend({
       init: function($sort_element,sorter){
+        var new_uuid = new UUID
+        this.uniq_id = new_uuid.value
+        this.created_at = new Date()
         if(sorter) this.sorter = sorter;
         $sort_element.data('hooch.SortElement', this)
         this.$sort_element = $sort_element;        
@@ -1588,21 +1562,19 @@ var initHooch = function(){
         var sort_element = this
         this.$drag_handle.on('mousedown touchstart', $.proxy(sort_element.onMousedown, sort_element))
         this.$sort_element.on('dragstart', function(e){hooch.pauseEvent(e); return false})
-        if(!sorter){
-          this.element_filters = this.getElementFilters()
-          $(window).on('mousemove touchmove', function(e){
-            sort_element.onMousemove(e)
-          })
-          $(window).on('mouseup touchend touchcancel', function(e){
-            sort_element.onMouseup(e)
-          })
-        }
+        this.element_filters = this.getElementFilters()
+        $(window).on('mousemove touchmove', function(e){
+          sort_element.onMousemove(e)
+        })
+        $(window).on('mouseup touchend touchcancel', function(e){
+          sort_element.onMouseup(e)
+        })
       },
       onMousedown: function(e){
         hooch.pauseEvent(e)        
         if(1 == e.which){
           if(this.sorter){
-            this.sorter.clearDraggingElement();
+            this.sorter.reinsertDraggingElement();
           }
           this.pressed = true
           this.starting_offset = this.getOffset();
@@ -1613,28 +1585,46 @@ var initHooch = function(){
       },
       onMousemove: function(e){
         hooch.pauseEvent(e)
-        if(!this.sorter){
-          if(this.pressed){this.setDraggingSolo()}
-        }
-        if(this.solo_dragging || this.attached_dragging){
+        if(this.pressed){this.setDragging()}
+        if(this.dragging){
+          this.handling_mouse_move = true
           var target_sorter = this.targetSorter(e)
           if(target_sorter){
             this.attachToSorter(target_sorter,e)
-          } else {
-            this.setPosition(e)
           }
+          this.setPosition(e)
+          if(this.sorter){
+            this.sorter.refreshSequence()
+          }
+          this.handling_mouse_move = false
         }
         return false
       },
       onMouseup: function(e){
-        if(!this.sorter && this.placeholder){
+        if(this.dragging){
+          this.awaitMouseMoveHandler()
+        }
+        if(this.pressed) this.unSetPressed()
+      },
+      awaitMouseMoveHandler: function() {
+        var sort_element = this
+        if (this.handling_mouse_move) {
+          setTimeout( function(){sort_element.awaitMouseMoveHandler()}, 500 );
+        } else {
+          this.handleMouseUp()
+        }
+      },
+      handleMouseUp: function(){
+        if(this.sorter){
+          this.sorter.dropDraggingElement()
+        } else {
           this.drop()
         }
-        if(this.pressed) this.pressed = false
-        if(this.solo_dragging) this.solo_dragging = false
       },
       currentSorters: function(){
-        return window.any_time_manager.recordedObjects['hooch.Sorter']
+        var sort_element = this
+        return window.any_time_manager.recordedObjects['hooch.Sorter'].
+          filter(function(sorter){return sorter != sort_element.sorter}) //Don't need the current parent
       },
       targetSorter: function(e){
         var current_sorters = this.currentSorters()
@@ -1667,10 +1657,10 @@ var initHooch = function(){
         return []
       },
       attachToSorter: function(target_sorter,e){
-        this.sorter = target_sorter
         delete this.reusable
         this.createPlaceHolder()
-        this.sorter.insertElementAtPosition(this,e)
+        this.sorter = target_sorter
+        this.sorter.insertDraggingElement(this)
       },
       unSetPressed: function(){
         this.pressed = false
@@ -1682,42 +1672,17 @@ var initHooch = function(){
         }
       },
       createPlaceHolder: function(){
-        if(this.solo_dragging){
-          this.placeholder = new hooch.SortPlaceholder(
-            this.$sort_element.
-              clone().
-              removeAttr('id').
-              removeAttr('data-sort-element').
-              css($.extend({visibility: 'hidden'},this.original_positioning)),
-            this)
-          this.solo_dragging = false
-        } else if(this.reusable){
-          this.placeholder = new hooch.SortPlaceholder(
-            this.$sort_element.
-              clone().
-              css({width: this.width, height: this.height}),
-            this)
-        } else {
-          this.placeholder = new hooch.SortPlaceholder(
-            this.$sort_element.
-              clone().
-              removeAttr('id').
-              removeAttr('data-sort-element').
-              css({position: this.original_positioning.position, width: this.width, height: this.height, visibility: 'hidden'}).
-              data('hooch-sorter-managed',true),
-            this)
-        }
-      },
-      setDraggingAttached: function(){
-        this.sorter.clearDraggingElement();
-        this.setDragging()
-        this.sorter.setDraggingElement(this);
-      },
-      setDraggingSolo: function(){
-        this.setDragging()
-        this.solo_dragging = true
+        var $placeholder = this.$sort_element.
+            clone().
+            removeAttr('id').
+            removeAttr('data-sort-element').
+            css(this.original_positioning)
+        if(!this.reusable){ $placeholder.css({visibility: 'hidden'}) }
+        if(this.sorter){ $placeholder.data('hooch-sorter-managed',true) }
+        this.placeholder = new hooch.SortPlaceholder($placeholder,this)
       },
       setDragging: function(){
+        if(this.sorter){this.sorter.reinsertDraggingElement()}
         this.dragging = true
         this.unSetPressed()
         this.createPlaceHolder()
@@ -1728,8 +1693,10 @@ var initHooch = function(){
           .data('hooch-sorter-managed',true)
           .appendTo('body')
         $tmp.replaceWith(this.placeholder.$sort_element)
+        if(this.sorter){this.sorter.setDraggingElement(this)}
       },
       drop: function(){
+        this.dragging = false
         this.css(this.original_positioning).data('hooch-sorter-managed',true)
         this.placeholder.replaceWith(this.$sort_element);
         delete this.placeholder
