@@ -1046,6 +1046,7 @@ var initHooch = function(){
     Sorter: Class.extend({
       init: function($sorter){
         this.$sorter = $sorter
+        this.$jq_obj = $sorter
         $sorter.data('sorter',this)
         var new_uuid = new UUID
         this.uniq_id = new_uuid.value
@@ -1059,12 +1060,18 @@ var initHooch = function(){
         this.startInactivityRefresh()
         var sorter = this
         $(window).on('mouseup touchend touchcancel', function(e){
-          sorter.onMouseup(e);
+          sorter.onMouseup(e)
         });
+        $sorter.on('scroll', function(){
+          sorter.handleScroll()
+        })
+        $sorter.parents().on('scroll', function(){
+          sorter.handleScroll()
+        })
         var observer = new MutationObserver(function(mutations) {
-          sorter.handleMutations(mutations)
+          sorter.onMutation(mutations)
         });
-        var config = { childList: true, subtree: true, attributes: true };
+        var config = { childList: true, subtree: true, attributes: true }
         observer.observe($sorter[0], config);
       },
       usePolymorphicId: function(){
@@ -1078,7 +1085,8 @@ var initHooch = function(){
         this.width = this.$sorter[0].getBoundingClientRect().width
         this.$sorter.css({width: this.width})
       },
-      handleMutations: function(mutations){
+      onMutation: function(mutations){
+        if(this.disabled) return
         var sorter = this;
         mutations.forEach(function(mutation) {
           if(mutation.addedNodes.length > 0){
@@ -1098,6 +1106,7 @@ var initHooch = function(){
         });
       },
       onMouseup: function(e){ // If some user action caused a sorter to become visible, set things up
+        if(this.disabled) return
         var sorter = this
         setTimeout(function(){
           if(!sorter.is_visible){
@@ -1107,6 +1116,16 @@ var initHooch = function(){
             }
           }
         },1000)
+      },
+      handleScroll: function(){
+        var sorter = this
+        if(this.scroll_finished){
+          clearTimeout(this.scroll_finished);  
+        }
+        this.scroll_finished = setTimeout(function(){
+          sorter.setBoundaries()
+          sorter.refreshGrid()
+        }, 100);
       },
       getPressedElement: function(){
         if(this.sort_elements){
@@ -1151,31 +1170,39 @@ var initHooch = function(){
         }
       },
       setBoundaries: function(){
-        var offset = this.$sorter.offset()
-        this.offset = this.$sorter.offset()
-        this.top_boundary = offset.top
-        this.left_boundary = offset.left
+        this.offset = this.$sorter[0].getBoundingClientRect()
+        this.top_boundary = this.offset.top + window.pageYOffset
+        this.left_boundary = this.offset.left + window.pageXOffset
         this.right_boundary = this.left_boundary + this.width
         this.height = this.$sorter[0].getBoundingClientRect().height
         this.bottom_boundary = this.top_boundary + this.height
+      },
+      handleDrag: function(){
+        this.refreshSequence()
+        this.refreshGrid()
       },
       refreshGrid: function(){
         this.rows = {}
         var sorter = this
         $.each(this.sort_elements,function(i,sort_element){
+          let this_element
           if(sort_element != sorter.dragging_element){
             this_element = sort_element
           } else {
             this_element = sort_element.placeholder
           }
-          var elem_top = this_element.getOffset().top;
-          if(!sorter.rows[elem_top]){
-            sorter.rows[elem_top] = []
+          if(this_element){
+            var elem_top = this_element.getOffset().top;
+            if(!sorter.rows[elem_top]){
+              sorter.rows[elem_top] = []
+            }
+            sorter.rows[elem_top].push(this_element)
           }
-          sorter.rows[elem_top].push(this_element)
         })
         this.row_keys = Object.keys(this.rows).map(function(val,i){return parseFloat(val)}).sort(sorter.numberSort)
-        $.each(this.rows, function(row_key,row){row.sort(sorter.elementHorizontalSort)})
+        if('Horizontal' == this.mode){
+          $.each(this.rows, function(row_key,row){row.sort(sorter.elementHorizontalSort)})
+        }
       },
       draggingElementForGrid: function(){
         if(this.dragging_element){
@@ -1194,6 +1221,9 @@ var initHooch = function(){
       },
       insertDraggingElement: function(element,e){
         this.dragging_element = element
+        this.refreshSequence()
+        this.getSortElements()
+        this.refreshGrid()
       },
       refreshSequenceGrid: function(target_location){
         var dragging_element = this.dragging_element
@@ -1204,13 +1234,11 @@ var initHooch = function(){
           var last_element = this.getLastElement();
           if(!last_element.is_placeholder){
             last_element.$sort_element.after(dragging_element.placeholder.$sort_element)
-            this.refreshGrid()
           }
         } else if('begin' == this.current_row_key){
           var first_element = this.getFirstElement();
           if(!first_element.is_placeholder){
             first_element.$sort_element.before(dragging_element.placeholder.$sort_element)
-            this.refreshGrid()
           }
         } else {
           var hovered_element = this.getHoveredElementHorizontal(target_location);
@@ -1218,10 +1246,8 @@ var initHooch = function(){
             if('leftmost' == hovered_element){
               var leftmost_element = this.current_row[0]
               leftmost_element.$sort_element.before(dragging_element.placeholder.$sort_element)
-              this.refreshGrid()
             } else {
               hovered_element.$sort_element.after(dragging_element.placeholder.$sort_element);
-              this.refreshGrid()
             }
           }
         }
@@ -1229,7 +1255,6 @@ var initHooch = function(){
       refreshSequenceVertical: function(target_location){
         var dragging_element = this.dragging_element
         var hovered_element = this.getHoveredElementVertical(target_location)
-
         if(hovered_element){
           if('first' == hovered_element){
             var first_key = this.row_keys[0]
@@ -1240,7 +1265,6 @@ var initHooch = function(){
           } else {
             hovered_element.$sort_element.after(dragging_element.placeholder.$sort_element)
           }
-          this.refreshGrid()
         }
       },
       rowAfter: function(row){
@@ -1389,6 +1413,17 @@ var initHooch = function(){
         current_row.push(sort_element.placeholder)
         this.refreshGrid();
       },
+      giveUpDraggingElement: function(){
+        let sorter = this
+        $.each(this.rows, function(row_key, row){
+          let placeholder_index = sorter.rows[row_key].indexOf(sorter.dragging_element.placeholder)
+            if(placeholder_index > -1){
+              sorter.rows[row_key].splice(placeholder_index,1)
+            }
+        })
+        delete this.dragging_element
+        this.getSortElements()
+      },
       dropDraggingElement: function(){
         this.reinsertDraggingElement()
         this.sendSort()
@@ -1448,21 +1483,23 @@ var initHooch = function(){
       },
       matchesFilters: function(element_filters){
         let recipient_filters = this.$sorter.data('recipient-filters')
-        // At least one of these is required to match
-        let any = true
-        for(var key in element_filters.any){
-          if(!recipient_filters.hasOwnProperty(key)){
-            any = false
-            break
+        if(typeof element_filters.any == 'object'){
+          // At least one of these is required to match
+          let any = true
+          for(var key in element_filters.any){
+            if(!recipient_filters.hasOwnProperty(key)){
+              any = false
+              break
+            }
+            let include_source = new Set(recipient_filters[key])
+            let include_test = new Set(element_filters.any[key])
+            if(include_source.intersection(include_test).size == 0){
+              any = false
+              break
+            }
           }
-          let include_source = new Set(recipient_filters[key])
-          let include_test = new Set(element_filters.any[key])
-          if(include_source.intersection(include_test).size == 0){
-            any = false
-            break
-          }
+          if(!any) return false
         }
-        if(!any) return false
         // All of these are required to match
         let all = true
         for(var key in element_filters.all){
@@ -1501,7 +1538,7 @@ var initHooch = function(){
         $('body').append(this.mask)
       },
       unmaskMe: function(){
-        this.mask.remove()
+        if(this.mask) this.mask.remove()
       },
       startInactivityRefresh: function(){
         this.last_activity_time = new Date().getTime();
@@ -1525,10 +1562,14 @@ var initHooch = function(){
         } else {
           setTimeout(function(){sorter.inactivityRefresh()}, 60000);
         }
+      },
+      disable: function(){
+        this.disabled = true
       }
     }),
     SortElement: Class.extend({
       init: function($sort_element,sorter){
+        this.$jq_obj = $sort_element
         var new_uuid = new UUID
         this.uniq_id = new_uuid.value
         this.created_at = new Date()
@@ -1538,8 +1579,9 @@ var initHooch = function(){
         this.reusable = $sort_element.data('sort-reusable')
         if(typeof(window.getComputedStyle) == 'function'){
           var computed_style = window.getComputedStyle(this.$sort_element[0])
-          this.width = this.$sort_element[0].getBoundingClientRect().width
-          this.height = this.$sort_element[0].getBoundingClientRect().height
+          var current_offset = this.getOffset()
+          this.width = current_offset.width
+          this.height = current_offset.height
           this.background_color = computed_style.getPropertyValue('background-color')
           this.padding = computed_style.getPropertyValue('padding')
           this.float = computed_style.getPropertyValue('float')
@@ -1562,7 +1604,7 @@ var initHooch = function(){
         var sort_element = this
         this.$drag_handle.on('mousedown touchstart', $.proxy(sort_element.onMousedown, sort_element))
         this.$sort_element.on('dragstart', function(e){hooch.pauseEvent(e); return false})
-        this.element_filters = this.getElementFilters()
+        this.element_filters = this.getElementFilters() || {}
         $(window).on('mousemove touchmove', function(e){
           sort_element.onMousemove(e)
         })
@@ -1571,48 +1613,37 @@ var initHooch = function(){
         })
       },
       onMousedown: function(e){
+        if(this.disabled) return
         hooch.pauseEvent(e)        
         if(1 == e.which){
-          if(this.sorter){
-            this.sorter.reinsertDraggingElement();
+          if(!this.pressed && !this.dragging && (!this.sorter || !this.sorter.dragging_element)){
+            this.pressed = true
+            this.starting_offset = this.getOffset();
+            this.mouse_start = {top: e.originalEvent.pageY, left: e.originalEvent.pageX}
+            this.maskNonTargets()
           }
-          this.pressed = true
-          this.starting_offset = this.getOffset();
-          this.mouse_start = {top: e.originalEvent.pageY, left: e.originalEvent.pageX}
-          this.maskNonTargets()
         }
         return false
       },
       onMousemove: function(e){
+        if(this.disabled) return
         hooch.pauseEvent(e)
         if(this.pressed){this.setDragging()}
         if(this.dragging){
-          this.handling_mouse_move = true
           var target_sorter = this.targetSorter(e)
           if(target_sorter){
             this.attachToSorter(target_sorter,e)
+          } else if(this.sorter){
+            this.sorter.handleDrag()
           }
           this.setPosition(e)
-          if(this.sorter){
-            this.sorter.refreshSequence()
-          }
-          this.handling_mouse_move = false
         }
         return false
       },
       onMouseup: function(e){
-        if(this.dragging){
-          this.awaitMouseMoveHandler()
-        }
+        if(this.disabled) return
         if(this.pressed) this.unSetPressed()
-      },
-      awaitMouseMoveHandler: function() {
-        var sort_element = this
-        if (this.handling_mouse_move) {
-          setTimeout( function(){sort_element.awaitMouseMoveHandler()}, 500 );
-        } else {
-          this.handleMouseUp()
-        }
+        if(this.dragging) this.handleMouseUp()
       },
       handleMouseUp: function(){
         if(this.sorter){
@@ -1657,7 +1688,14 @@ var initHooch = function(){
         return []
       },
       attachToSorter: function(target_sorter,e){
-        delete this.reusable
+        if(this.reusable){
+          delete this.reusable
+        } else {
+          this.destroyPlaceHolder()
+        }
+        if(this.sorter){
+          this.sorter.giveUpDraggingElement()
+        }
         this.createPlaceHolder()
         this.sorter = target_sorter
         this.sorter.insertDraggingElement(this)
@@ -1681,8 +1719,11 @@ var initHooch = function(){
         if(this.sorter){ $placeholder.data('hooch-sorter-managed',true) }
         this.placeholder = new hooch.SortPlaceholder($placeholder,this)
       },
+      destroyPlaceHolder: function(){
+        this.placeholder.destroy()
+        delete this.placeholder
+      },
       setDragging: function(){
-        if(this.sorter){this.sorter.reinsertDraggingElement()}
         this.dragging = true
         this.unSetPressed()
         this.createPlaceHolder()
@@ -1706,7 +1747,11 @@ var initHooch = function(){
         return this.$sort_element.data('target-filters')
       },
       getOffset: function(){
-        return this.$sort_element.offset();
+        let viewport_offset = this.$sort_element[0].getBoundingClientRect()
+        return {top: viewport_offset.top + window.pageYOffset,
+          left: viewport_offset.left + window.pageXOffset,
+          height: viewport_offset.height,
+          width: viewport_offset.width}
       },
       setPosition: function(e){
         var delta = this.getDelta(e)
@@ -1741,6 +1786,13 @@ var initHooch = function(){
       },
       replaceWith: function($jq_obj){
         this.$sort_element.replaceWith($jq_obj)
+      },
+      disable: function(){
+        this.disabled = true
+      },
+      destroy: function(){
+        this.disable()
+        this.$sort_element.remove()
       }
     }),
     scroll_keys: {37: 1, 38: 1, 39: 1, 40: 1},
@@ -1888,6 +1940,8 @@ var initHooch = function(){
   };
   hooch.SortPlaceholder = hooch.SortElement.extend({
     init: function($sort_element,sort_element){
+      var new_uuid = new UUID
+      this.uniq_id = new_uuid.value
       $sort_element.data('hooch.SortElement', this)
       this.sort_element = sort_element
       this.sorter = sort_element.sorter;
@@ -2183,6 +2237,11 @@ var initHooch = function(){
       }
     })
   });
+  $(document).ajaxStop(function(){
+    $.each(window.any_time_manager.recordedObjects['hooch.Sorter'], function(index, sorter){
+      sorter.setBoundaries()
+    })
+  })
 }
 if(typeof Class === "undefined"){
   $.getScript('https://rawgit.com/edraut/js_inheritance/a6c1e40986ecb276335b0a0b1792abd01f05ff6c/inheritance.js', function(){
