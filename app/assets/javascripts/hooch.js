@@ -1111,6 +1111,7 @@ var initHooch = function(){
         setTimeout(function(){
           if(!sorter.is_visible){
             if(sorter.$sorter.is(':visible')){
+              sorter.is_visible = true
               sorter.setWidth();
               sorter.getSortElements();
             }
