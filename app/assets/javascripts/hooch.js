@@ -2257,7 +2257,7 @@ var initHooch = function(){
     })
   });
   $(document).ajaxStop(function(){
-    if(window.any_time_manager.recordedObjects.hasOwnProperty('hooch.Sorter')){
+    if(window.any_time_manager.hasOwnProperty('recordedObjects') && window.any_time_manager.recordedObjects.hasOwnProperty('hooch.Sorter')){
       $.each(window.any_time_manager.recordedObjects['hooch.Sorter'], function(index, sorter){
         sorter.setBoundaries()
       })
