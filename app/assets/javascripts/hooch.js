@@ -1048,15 +1048,19 @@ var initHooch = function(){
         this.$sorter = $sorter
         this.$jq_obj = $sorter
         $sorter.data('sorter',this)
-        var new_uuid = new UUID
-        this.uniq_id = new_uuid.value
-        this.created_at = new Date()
+        //////////////////////////////////////////
+        // Helpful for debugging in the browser
+        // var new_uuid = new UUID
+        // this.uniq_id = new_uuid.value
+        // this.created_at = new Date()
+        //////////////////////////////////////////
         this.is_visible = $sorter.is(':visible')
         if(this.is_visible){
           this.setWidth()
           this.setBoundaries()
           this.getSortElements()
         }
+        this.getSendSort()
         this.startInactivityRefresh()
         var sorter = this
         $(window).on('mouseup touchend touchcancel', function(e){
@@ -1564,6 +1568,13 @@ var initHooch = function(){
           setTimeout(function(){sorter.inactivityRefresh()}, 60000);
         }
       },
+      getSendSort: function(){
+        let send_sort_now = this.$sorter.find('[data-send-sort-now]')
+        let sorter = this
+        send_sort_now.on('click', function(){
+          sorter.sendSort()
+        })
+      },
       disable: function(){
         this.disabled = true
       }
@@ -1571,9 +1582,12 @@ var initHooch = function(){
     SortElement: Class.extend({
       init: function($sort_element,sorter){
         this.$jq_obj = $sort_element
-        var new_uuid = new UUID
-        this.uniq_id = new_uuid.value
-        this.created_at = new Date()
+        //////////////////////////////////////////
+        // Helpful for debugging in the browser:
+        // var new_uuid = new UUID
+        // this.uniq_id = new_uuid.value
+        // this.created_at = new Date()
+        //////////////////////////////////////////
         if(sorter) this.sorter = sorter;
         $sort_element.data('hooch.SortElement', this)
         this.$sort_element = $sort_element;        
@@ -1942,7 +1956,11 @@ var initHooch = function(){
   hooch.SortPlaceholder = hooch.SortElement.extend({
     init: function($sort_element,sort_element){
       var new_uuid = new UUID
-      this.uniq_id = new_uuid.value
+      //////////////////////////////////////////
+      // Helpful for debugging in the browser
+      // this.uniq_id = new_uuid.value
+      //////////////////////////////////////////
+
       $sort_element.data('hooch.SortElement', this)
       this.sort_element = sort_element
       this.sorter = sort_element.sorter;
@@ -2239,9 +2257,11 @@ var initHooch = function(){
     })
   });
   $(document).ajaxStop(function(){
-    $.each(window.any_time_manager.recordedObjects['hooch.Sorter'], function(index, sorter){
-      sorter.setBoundaries()
-    })
+    if(window.any_time_manager.recordedObjects.hasOwnProperty('hooch.Sorter')){
+      $.each(window.any_time_manager.recordedObjects['hooch.Sorter'], function(index, sorter){
+        sorter.setBoundaries()
+      })
+    }
   })
 }
 if(typeof Class === "undefined"){

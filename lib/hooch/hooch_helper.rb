@@ -261,5 +261,23 @@ module Hooch
     def bind_key_attrs(key_name)
       "data-bind-key=\"#{key_name}\"".html_safe
     end
+
+    def sorter(polymorphic_id: nil, recipient_filters: nil, href: nil)
+      attrs = "data-sorter=true"
+      attrs += " data-recipient-filters=#{recipient_filters}" if recipient_filters
+      attrs += " data-polymorphic-id=#{polymorphic_id}" if polymorphic_id
+      attrs += " href=#{href}" if href
+      attrs
+    end
+
+    def solo_sort_element(reusable: false, target_filters: nil)
+      attrs = "data-sort-element=true"
+      attrs += " data-target-filters=#{target_filters}" if target_filters
+      attrs
+    end
+
+    def send_sort_now
+      "data-send-sort-now"
+    end
   end
 end
