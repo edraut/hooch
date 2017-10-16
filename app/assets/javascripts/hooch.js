@@ -1091,21 +1091,25 @@ var initHooch = function(){
       },
       onMutation: function(mutations){
         if(this.disabled) return
-        var sorter = this;
+        let sorter = this;
+        let actually_changed_nodes = false
         mutations.forEach(function(mutation) {
           if(mutation.addedNodes.length > 0){
-            var added_node = $(mutation.addedNodes[0])
+            let added_node = $(mutation.addedNodes[0])
             if((!added_node.attr('id') || !added_node.attr('id').startsWith('thin_man_ajax_progress')) && !added_node.data('hooch-sorter-managed')){
-              sorter.getSortElements()
-              sorter.setBoundaries()
+              actually_changed_nodes = true
             }
           }
           if(mutation.removedNodes.length > 0){
-            var removed_node = $(mutation.removedNodes[0])
+            let removed_node = $(mutation.removedNodes[0])
             if((!removed_node.attr('id') || !removed_node.attr('id').startsWith('thin_man_ajax_progress')) && !removed_node.data('hooch-sorter-managed')){
-              sorter.getSortElements()
-              sorter.setBoundaries()
+              actually_changed_nodes = true
             }
+          }
+          if(actually_changed_nodes){ //updating sorter for changed element list
+            sorter.getSortElements()
+            sorter.setBoundaries()
+            sorter.getSendSort()
           }
         });
       },
@@ -1571,9 +1575,14 @@ var initHooch = function(){
       getSendSort: function(){
         let send_sort_now = this.$sorter.find('[data-send-sort-now]')
         let sorter = this
-        send_sort_now.on('click', function(){
-          sorter.sendSort()
-        })
+        if(send_sort_now.length > 0){
+          console.log('got send sort:')
+          console.log(this.$sorter.attr('id'))
+          send_sort_now.on('click', function(){
+            console.log('sending sort...')
+            sorter.sendSort()
+          })
+        }
       },
       disable: function(){
         this.disabled = true
