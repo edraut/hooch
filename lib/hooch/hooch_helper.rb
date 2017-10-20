@@ -273,6 +273,7 @@ module Hooch
     def solo_sort_element(reusable: false, target_filters: nil)
       attrs = "data-sort-element=true"
       attrs += " data-target-filters=#{target_filters}" if target_filters
+      attrs += " data-sort-reusable=true" if reusable
       attrs
     end
 

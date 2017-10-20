@@ -1047,7 +1047,7 @@ var initHooch = function(){
       init: function($sorter){
         this.$sorter = $sorter
         this.$jq_obj = $sorter
-        $sorter.data('sorter',this)
+        $sorter.data('hooch.Sorter',this)
         //////////////////////////////////////////
         // Helpful for debugging in the browser
         // var new_uuid = new UUID
@@ -1189,6 +1189,9 @@ var initHooch = function(){
       handleDrag: function(){
         this.refreshSequence()
         this.refreshGrid()
+      },
+      handleRemoval: function(){
+
       },
       refreshGrid: function(){
         this.rows = {}
