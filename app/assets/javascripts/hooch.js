@@ -35,14 +35,14 @@ Set.prototype.difference = function(setB) {
   })
   return difference;
 }
-Set.prototype.from_iterable = function(arr) {
+Set.from_iterable = function(arr) {
   if(typeof Set.prototype.values == 'undefined'){
-    var new_set = Set.new()
+    var new_set = new Set()
     arr.forEach(function(v,i,t){
       new_set.add(v)
     })
   }else{
-    var new_set = Set.new(arr)
+    var new_set = new Set(arr)
   }
   return new_set
 }
