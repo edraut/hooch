@@ -1,36 +1,50 @@
 Set.prototype.isSuperset = function(subset) {
-    for (var elem of subset) {
-        if (!this.has(elem)) {
-            return false;
-        }
+  let this_set = this
+  subset.forEach (function(elem) {
+    if (!this_set.has(elem)) {
+      return false;
     }
-    return true;
+  })
+  return true;
 }
 
 Set.prototype.union = function(setB) {
-    var union = new Set(this);
-    for (var elem of setB) {
-        union.add(elem);
-    }
-    return union;
+  let union = Set.from_iterable(this);
+  let this_set = this
+  setB.forEach(function(elem) {
+    union.add(elem);
+  })
+  return union;
 }
 
 Set.prototype.intersection = function(setB) {
-    var intersection = new Set();
-    for (var elem of setB) {
-        if (this.has(elem)) {
-            intersection.add(elem);
-        }
+  var intersection = new Set();
+  let this_set = this
+  setB.forEach(function(elem) {
+    if (this_set.has(elem)) {
+      intersection.add(elem);
     }
-    return intersection;
+  })
+  return intersection;
 }
 
 Set.prototype.difference = function(setB) {
-    var difference = new Set(this);
-    for (var elem of setB) {
-        difference.delete(elem);
-    }
-    return difference;
+  var difference = Set.from_iterable(this);
+  setB.forEach( function (elem) {
+    difference.delete(elem);
+  })
+  return difference;
+}
+Set.prototype.from_iterable = function(arr) {
+  if(typeof Set.prototype.values == 'undefined'){
+    var new_set = Set.new()
+    arr.forEach(function(v,i,t){
+      new_set.add(v)
+    })
+  }else{
+    var new_set = Set.new(arr)
+  }
+  return new_set
 }
 var initHooch = function(){
   hooch = {
@@ -1503,8 +1517,8 @@ var initHooch = function(){
               any = false
               break
             }
-            let include_source = new Set(recipient_filters[key])
-            let include_test = new Set(element_filters.any[key])
+            let include_source = Set.from_iterable(recipient_filters[key])
+            let include_test = Set.from_iterable(element_filters.any[key])
             if(include_source.intersection(include_test).size == 0){
               any = false
               break
@@ -1519,8 +1533,8 @@ var initHooch = function(){
             all = false
             break
           }
-          let include_source = new Set(recipient_filters[key])
-          let include_test = new Set(element_filters.all[key])
+          let include_source = Set.from_iterable(recipient_filters[key])
+          let include_test = Set.from_iterable(element_filters.all[key])
           if(!include_source.isSuperset(include_test)){
             all = false
             break
@@ -1531,8 +1545,8 @@ var initHooch = function(){
         var none = true
         for(var key in element_filters.none){
           if(!recipient_filters.hasOwnProperty(key)){continue}
-          let exclude_source = new Set(recipient_filters[key])
-          let exclude_test = new Set(element_filters.none[key])
+          let exclude_source = Set.from_iterable(recipient_filters[key])
+          let exclude_test = Set.from_iterable(element_filters.none[key])
           if(exclude_source.intersection(exclude_test).size != 0){
             none = false
             break
