@@ -1,5 +1,5 @@
 Set.prototype.isSuperset = function(subset) {
-  let this_set = this
+  var this_set = this
   subset.forEach (function(elem) {
     if (!this_set.has(elem)) {
       return false;
@@ -9,8 +9,7 @@ Set.prototype.isSuperset = function(subset) {
 }
 
 Set.prototype.union = function(setB) {
-  let union = Set.from_iterable(this);
-  let this_set = this
+  var union = Set.from_iterable(this);
   setB.forEach(function(elem) {
     union.add(elem);
   })
@@ -19,7 +18,7 @@ Set.prototype.union = function(setB) {
 
 Set.prototype.intersection = function(setB) {
   var intersection = new Set();
-  let this_set = this
+  var this_set = this
   setB.forEach(function(elem) {
     if (this_set.has(elem)) {
       intersection.add(elem);
@@ -1105,17 +1104,17 @@ var initHooch = function(){
       },
       onMutation: function(mutations){
         if(this.disabled) return
-        let sorter = this;
-        let actually_changed_nodes = false
+        var sorter = this;
+        var actually_changed_nodes = false
         mutations.forEach(function(mutation) {
           if(mutation.addedNodes.length > 0){
-            let added_node = $(mutation.addedNodes[0])
+            var added_node = $(mutation.addedNodes[0])
             if((!added_node.attr('id') || !added_node.attr('id').startsWith('thin_man_ajax_progress')) && !added_node.data('hooch-sorter-managed')){
               actually_changed_nodes = true
             }
           }
           if(mutation.removedNodes.length > 0){
-            let removed_node = $(mutation.removedNodes[0])
+            var removed_node = $(mutation.removedNodes[0])
             if((!removed_node.attr('id') || !removed_node.attr('id').startsWith('thin_man_ajax_progress')) && !removed_node.data('hooch-sorter-managed')){
               actually_changed_nodes = true
             }
@@ -1211,7 +1210,7 @@ var initHooch = function(){
         this.rows = {}
         var sorter = this
         $.each(this.sort_elements,function(i,sort_element){
-          let this_element
+          var this_element
           if(sort_element != sorter.dragging_element){
             this_element = sort_element
           } else {
@@ -1440,9 +1439,9 @@ var initHooch = function(){
         this.refreshGrid();
       },
       giveUpDraggingElement: function(){
-        let sorter = this
+        var sorter = this
         $.each(this.rows, function(row_key, row){
-          let placeholder_index = sorter.rows[row_key].indexOf(sorter.dragging_element.placeholder)
+          var placeholder_index = sorter.rows[row_key].indexOf(sorter.dragging_element.placeholder)
             if(placeholder_index > -1){
               sorter.rows[row_key].splice(placeholder_index,1)
             }
@@ -1503,22 +1502,22 @@ var initHooch = function(){
         })[0]
       },
       containsPoint: function(point){
-        let contains_horizontal = this.left_boundary <= point.x && point.x <= this.right_boundary
-        let contains_vertical = this.top_boundary <= point.y && point.y <= this.bottom_boundary
+        var contains_horizontal = this.left_boundary <= point.x && point.x <= this.right_boundary
+        var contains_vertical = this.top_boundary <= point.y && point.y <= this.bottom_boundary
         return contains_horizontal && contains_vertical
       },
       matchesFilters: function(element_filters){
-        let recipient_filters = this.$sorter.data('recipient-filters')
+        var recipient_filters = this.$sorter.data('recipient-filters')
         if(typeof element_filters.any == 'object'){
           // At least one of these is required to match
-          let any = true
+          var any = true
           for(var key in element_filters.any){
             if(!recipient_filters.hasOwnProperty(key)){
               any = false
               break
             }
-            let include_source = Set.from_iterable(recipient_filters[key])
-            let include_test = Set.from_iterable(element_filters.any[key])
+            var include_source = Set.from_iterable(recipient_filters[key])
+            var include_test = Set.from_iterable(element_filters.any[key])
             if(include_source.intersection(include_test).size == 0){
               any = false
               break
@@ -1527,14 +1526,14 @@ var initHooch = function(){
           if(!any) return false
         }
         // All of these are required to match
-        let all = true
+        var all = true
         for(var key in element_filters.all){
           if(!recipient_filters.hasOwnProperty(key)){
             all = false
             break
           }
-          let include_source = Set.from_iterable(recipient_filters[key])
-          let include_test = Set.from_iterable(element_filters.all[key])
+          var include_source = Set.from_iterable(recipient_filters[key])
+          var include_test = Set.from_iterable(element_filters.all[key])
           if(!include_source.isSuperset(include_test)){
             all = false
             break
@@ -1545,8 +1544,8 @@ var initHooch = function(){
         var none = true
         for(var key in element_filters.none){
           if(!recipient_filters.hasOwnProperty(key)){continue}
-          let exclude_source = Set.from_iterable(recipient_filters[key])
-          let exclude_test = Set.from_iterable(element_filters.none[key])
+          var exclude_source = Set.from_iterable(recipient_filters[key])
+          var exclude_test = Set.from_iterable(element_filters.none[key])
           if(exclude_source.intersection(exclude_test).size != 0){
             none = false
             break
@@ -1590,8 +1589,8 @@ var initHooch = function(){
         }
       },
       getSendSort: function(){
-        let send_sort_now = this.$sorter.find('[data-send-sort-now]')
-        let sorter = this
+        var send_sort_now = this.$sorter.find('[data-send-sort-now]')
+        var sorter = this
         if(send_sort_now.length > 0){
           console.log('got send sort:')
           console.log(this.$sorter.attr('id'))
@@ -1788,7 +1787,7 @@ var initHooch = function(){
         return this.$sort_element.data('target-filters')
       },
       getOffset: function(){
-        let viewport_offset = this.$sort_element[0].getBoundingClientRect()
+        var viewport_offset = this.$sort_element[0].getBoundingClientRect()
         return {top: viewport_offset.top + window.pageYOffset,
           left: viewport_offset.left + window.pageXOffset,
           height: viewport_offset.height,
