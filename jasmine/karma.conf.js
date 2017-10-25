@@ -16,6 +16,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'test-main.js',
+      {pattern: 'node_modules/babel-polyfill/dist/polyfill.min.js'},
       {pattern: 'jquery.js'},
       {pattern: 'inheritance.js'},
       {pattern: 'jasmine-fixture.js'},
