@@ -524,6 +524,9 @@ var initHooch = function(){
           tab_group.tab_triggers.push(new_tab);
           tab_group.tab_triggers_by_id[new_tab.tab_id] = new_tab;
         })
+        if(this.tab_triggers.length == 0){
+          console.log("WARNING: hooch could not find any tab triggers for the tab set named '" + this.name + "'")
+        }
       },
       getTabByPushState: function(state_value){
         var selected_tab = null;
@@ -541,9 +544,14 @@ var initHooch = function(){
         this.$content_parent = this.tab_triggers[0].getParent();
       },
       handleDefault: function(){
-        if(this.$tab_group.data('default-tab')){
-          this.default_tab = this.tab_triggers_by_id[this.$tab_group.data('default-tab')];
-          this.default_tab.toggleTarget(this.state_behavior);
+        var default_tab_name = this.$tab_group.data('default-tab')
+        if(default_tab_name){
+          this.default_tab = this.tab_triggers_by_id[default_tab_name];
+          if(!this.default_tab){
+            console.log("WARNING: hooch could not find the tab " + default_tab_name + " for tab set " + this.name)
+          } else {
+            this.default_tab.toggleTarget(this.state_behavior);
+          }
         }
       },
       hideAll: function(trigger){
@@ -1074,6 +1082,7 @@ var initHooch = function(){
           this.getSortElements()
         }
         this.getSendSort()
+        this.getProgressTarget()
         this.startInactivityRefresh()
         var sorter = this
         $(window).on('mouseup touchend touchcancel', function(e){
@@ -1461,11 +1470,20 @@ var initHooch = function(){
           this.refreshGrid();
         }
       },
+      getProgressTarget: function(){
+        if($sorter.data('progress-target')){
+          this.$progress_target = $($sorter.data('progress-target'))
+        }
+      },
       sendSort: function(){
+        var progress_indicator = new thin_man.AjaxProgress(this.$progress_target,this.$sorter,'black')
         $.ajax({
           url: this.$sorter.attr('href'),
           method: 'PATCH',
-          data: this.getFormData()
+          data: this.getFormData(),
+          complete: function(jqXHR) {
+            progress_indicator.stop()
+          }
         })
       },
       getFormData: function(){

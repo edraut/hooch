@@ -1,6 +1,11 @@
 module Hooch
   module HoochHelper
     def tab_set(name, type: nil, default_tab: nil, no_history: nil, preload_tabs: nil)
+      if params[name].present?
+        default_tab = params[name]
+      else
+        default_tab = default_tab
+      end
       if :ajax == type
         type = 'AjaxTabGroup'
       end
