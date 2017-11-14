@@ -1082,7 +1082,6 @@ var initHooch = function(){
           this.getSortElements()
         }
         this.getSendSort()
-        this.getProgressTarget()
         this.startInactivityRefresh()
         var sorter = this
         $(window).on('mouseup touchend touchcancel', function(e){
@@ -1471,18 +1470,32 @@ var initHooch = function(){
         }
       },
       getProgressTarget: function(){
-        if($sorter.data('progress-target')){
-          this.$progress_target = $($sorter.data('progress-target'))
+        if(this.$progress_target) return
+        if(this.$sorter.data('progress-target')){
+          this.$progress_target = $(this.$sorter.data('progress-target'))
+        }
+      },
+      startProgressIndicator: function(){
+        this.getProgressTarget()
+        if(this.$progress_target){
+          this.progress_indicator = new thin_man.AjaxProgress(this.$progress_target,this.$sorter,'black')
+        }
+      },
+      stopProgressIndicator: function(){
+        if(this.progress_indicator){
+          this.progress_indicator.stop()
+          delete this.progress_indicator
         }
       },
       sendSort: function(){
-        var progress_indicator = new thin_man.AjaxProgress(this.$progress_target,this.$sorter,'black')
+        this.startProgressIndicator()
+        var sorter = this
         $.ajax({
           url: this.$sorter.attr('href'),
           method: 'PATCH',
           data: this.getFormData(),
           complete: function(jqXHR) {
-            progress_indicator.stop()
+            sorter.stopProgressIndicator()
           }
         })
       },
