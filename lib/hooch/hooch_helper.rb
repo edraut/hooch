@@ -1,8 +1,10 @@
 module Hooch
   module HoochHelper
     def tab_set(name, type: nil, default_tab: nil, no_history: nil, preload_tabs: nil)
-      if params[name].present?
-        default_tab = params[name]
+      param_key = name.to_sym
+      clean_params = params.permit!.to_hash.symbolize_keys
+      if clean_params[param_key].present?
+        default_tab = clean_params[param_key].to_s
       else
         default_tab = default_tab
       end
