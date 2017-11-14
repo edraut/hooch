@@ -1082,6 +1082,7 @@ var initHooch = function(){
           this.getSortElements()
         }
         this.getSendSort()
+        this.getRecipientFilters()
         this.startInactivityRefresh()
         var sorter = this
         $(window).on('mouseup touchend touchcancel', function(e){
@@ -1537,17 +1538,22 @@ var initHooch = function(){
         var contains_vertical = this.top_boundary <= point.y && point.y <= this.bottom_boundary
         return contains_horizontal && contains_vertical
       },
+      getRecipientFilters: function(){
+        this.recipient_filters = this.$sorter.data('recipient-filters')
+      },
       matchesFilters: function(element_filters){
-        var recipient_filters = this.$sorter.data('recipient-filters')
+        if(!this.recipient_filters){
+          return false
+        }
         if(typeof element_filters.any == 'object'){
           // At least one of these is required to match
           var any = true
           for(var key in element_filters.any){
-            if(!recipient_filters.hasOwnProperty(key)){
+            if(!this.recipient_filters.hasOwnProperty(key)){
               any = false
               break
             }
-            var include_source = Set.from_iterable(recipient_filters[key])
+            var include_source = Set.from_iterable(this.recipient_filters[key])
             var include_test = Set.from_iterable(element_filters.any[key])
             if(include_source.intersection(include_test).size == 0){
               any = false
@@ -1559,11 +1565,11 @@ var initHooch = function(){
         // All of these are required to match
         var all = true
         for(var key in element_filters.all){
-          if(!recipient_filters.hasOwnProperty(key)){
+          if(!this.recipient_filters.hasOwnProperty(key)){
             all = false
             break
           }
-          var include_source = Set.from_iterable(recipient_filters[key])
+          var include_source = Set.from_iterable(this.recipient_filters[key])
           var include_test = Set.from_iterable(element_filters.all[key])
           if(!include_source.isSuperset(include_test)){
             all = false
@@ -1574,8 +1580,8 @@ var initHooch = function(){
         // None of these can be present to match
         var none = true
         for(var key in element_filters.none){
-          if(!recipient_filters.hasOwnProperty(key)){continue}
-          var exclude_source = Set.from_iterable(recipient_filters[key])
+          if(!this.recipient_filters.hasOwnProperty(key)){continue}
+          var exclude_source = Set.from_iterable(this.recipient_filters[key])
           var exclude_test = Set.from_iterable(element_filters.none[key])
           if(exclude_source.intersection(exclude_test).size != 0){
             none = false
@@ -1698,9 +1704,9 @@ var initHooch = function(){
       },
       onMousemove: function(e){
         if(this.disabled) return
-        hooch.pauseEvent(e)
         if(this.pressed){this.setDragging()}
         if(this.dragging){
+          hooch.pauseEvent(e)
           var target_sorter = this.targetSorter(e)
           if(target_sorter){
             this.attachToSorter(target_sorter,e)
@@ -1708,8 +1714,8 @@ var initHooch = function(){
             this.sorter.handleDrag()
           }
           this.setPosition(e)
+          return false
         }
-        return false
       },
       onMouseup: function(e){
         if(this.disabled) return
@@ -1725,8 +1731,9 @@ var initHooch = function(){
       },
       currentSorters: function(){
         var sort_element = this
-        return window.any_time_manager.recordedObjects['hooch.Sorter'].
+        var these_sorters = window.any_time_manager.recordedObjects['hooch.Sorter'].
           filter(function(sorter){return sorter != sort_element.sorter}) //Don't need the current parent
+        these_sorters.filter(function(sorter){return sorter.recipient_filters})
       },
       targetSorter: function(e){
         var current_sorters = this.currentSorters()
