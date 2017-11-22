@@ -1,3 +1,4 @@
+jasmine.getFixtures().fixturesPath = 'base/fixtures'
 MutationObserver = Class.extend({
   init: function(callback){},
   observe: function(elem,config){}
@@ -379,43 +380,43 @@ describe("hooch", function() {
   })
   describe('SoloSortElement', function(){
     beforeEach(function(){
-      $sort_elem_a = affix('div#a[style="width:100px; height:100px; position:relative; float:left;"][data-sort-reusable=true][data-target-filters="{any: {items: [1]}"]')
-      $sort_elem_b = affix('div#b[style="width: 100px; height: 100px; position:relative; float:left;"][data-sort-reusable=true]')
-      $sorter = affix('div[data-sorter][style="width: 100px; position:relative; float:left;"][data-recipient-filters="{items: [1]}"]')
-      $sort_elem_c = $sorter.affix('div#c[style="width: 100px; height: 100px; position:relative; float:left;"]')
-      $sort_elem_d = $sorter.affix('div#d[style="width: 100px; height: 100px; position:relative; float:left;"]')
+      loadFixtures('solo_sort_elements.html')
+      $sort_elem_a = $('div#thing_a')
+      $sort_elem_b = $('div#thing_b')
+      $sorter = $('div#sorter')
+      $sort_elem_c = $('div#thing_c')
+      $sort_elem_d = $('div#thing_d')
       sort_elem_a = new hooch.SortElement($sort_elem_a)
       sort_elem_b = new hooch.SortElement($sort_elem_b)
       sorter = new hooch.Sorter($sorter)
       sort_elem_c = $.grep(sorter.sort_elements, function(elem,i){
-        return 'c' == elem.$sort_element.attr('id')
+        return 'thing_c' == elem.$sort_element.attr('id')
       })[0]
       sort_elem_d = $.grep(sorter.sort_elements, function(elem,i){
-        return 'd' == elem.$sort_element.attr('id')
+        return 'thing_d' == elem.$sort_element.attr('id')
       })[0]
     })
-    afterEach(function(){
-      $sorter.remove()
-      $sort_elem_a.remove()
-      $sort_elem_b.remove()
-      $sort_elem_c.remove()
-      $sort_elem_d.remove()
-    })
     it('attaches to a sorter', function(){
-      window.foo = 'bar'
+      //Stub out any_time_manager's map of objects with our sorter so the elements can find it
+      window.any_time_manager.recordedObjects['hooch.Sorter'] = [sorter]
       sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
-      sort_elem_a.onMousemove({originalEvent: {pageY: 10, pageX: 10}})
-      var elem_before_c = sort_elem_c.$sort_element.prev()
-      //The dom element for the placeholder is now in the dom just before 'c'
-      console.log("in test")
-      console.log(sorter.$sort_elements)
-      console.log(elem_before_c)
-      console.log(sort_elem_a.placeholder.$sort_element)
-      console.log("end in test")
-      expect(elem_before_c.is(sort_elem_a.placeholder.$sort_element)).toBe(true)
-      //element 'b' is now the first in line, since a has shifted one forward
-      expect(sorter.$sorter.children(':first').attr('id')).toEqual('a')
-      delete window.foo
+      sort_elem_a.onMousemove({originalEvent: {pageY: 250, pageX: 10}})
+      sort_elem_a.onMouseup({})
+
+      //The sorter will send the new list with sort_elem_a in the correct position
+      var expected_output = { thing: [ 'c', 'a', 'd' ] }
+      expect(sorter.getFormData()).toEqual(expected_output)
+    })
+    it('ignores a non-matching sorter', function(){
+      //Stub out any_time_manager's map of objects with our sorter so the elements can find it
+      window.any_time_manager.recordedObjects['hooch.Sorter'] = [sorter]
+      sort_elem_b.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
+      sort_elem_b.onMousemove({originalEvent: {pageY: 250, pageX: 10}})
+      sort_elem_a.onMouseup({})
+
+      //The sorter will send the new list without sort_elem_b
+      var expected_output = { thing: [ 'c', 'd' ] }
+      expect(sorter.getFormData()).toEqual(expected_output)
     })    
   })
   describe('BindKey', function(){
