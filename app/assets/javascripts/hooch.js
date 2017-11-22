@@ -1173,12 +1173,8 @@ var initHooch = function(){
         var sorter = this;
         this.$sort_elements.each(function(){
           if($(this).data('hooch.SortElement')){
-            tmp_sort_element = $(this).data('hooch.SortElement')
-            // if(tmp_sort_element.is_placeholder){
-            //   var sort_element = tmp_sort_element.sort_element
-            // } else {
-              var sort_element = tmp_sort_element
-            // }
+            var sort_element = $(this).data('hooch.SortElement')
+            sort_element.refreshAfterPossibleMutation()
           } else {
             var sort_element = new hooch.SortElement($(this),sorter)
           }
@@ -1629,10 +1625,7 @@ var initHooch = function(){
         var send_sort_now = this.$sorter.find('[data-send-sort-now]')
         var sorter = this
         if(send_sort_now.length > 0){
-          console.log('got send sort:')
-          console.log(this.$sorter.attr('id'))
           send_sort_now.on('click', function(){
-            console.log('sending sort...')
             sorter.sendSort()
           })
         }
@@ -1677,9 +1670,7 @@ var initHooch = function(){
         this.dragging = false
         this.getDragHandle()
         this.$sort_element.css({cursor: ''});
-        this.$drag_handle.css({cursor: 'move'});
         var sort_element = this
-        this.$drag_handle.on('mousedown touchstart', $.proxy(sort_element.onMousedown, sort_element))
         this.$sort_element.on('dragstart', function(e){hooch.pauseEvent(e); return false})
         this.element_filters = this.getElementFilters() || {}
         $(window).on('mousemove touchmove', function(e){
@@ -1708,12 +1699,12 @@ var initHooch = function(){
         if(this.dragging){
           hooch.pauseEvent(e)
           var target_sorter = this.targetSorter(e)
+          this.setPosition(e)
           if(target_sorter){
             this.attachToSorter(target_sorter,e)
           } else if(this.sorter){
             this.sorter.handleDrag()
           }
-          this.setPosition(e)
           return false
         }
       },
@@ -1729,11 +1720,14 @@ var initHooch = function(){
           this.drop()
         }
       },
+      refreshAfterPossibleMutation: function(){
+        this.getDragHandle()
+      },
       currentSorters: function(){
         var sort_element = this
         var these_sorters = window.any_time_manager.recordedObjects['hooch.Sorter'].
           filter(function(sorter){return sorter != sort_element.sorter}) //Don't need the current parent
-        these_sorters.filter(function(sorter){return sorter.recipient_filters})
+        return these_sorters.filter(function(sorter){return sorter.recipient_filters})
       },
       targetSorter: function(e){
         var current_sorters = this.currentSorters()
@@ -1785,6 +1779,15 @@ var initHooch = function(){
         this.$drag_handle = this.$sort_element.findExclude('[data-drag-handle]','[data-sorter]')
         if(this.$drag_handle.length < 1){
           this.$drag_handle = this.$sort_element
+        }
+        this.initializeDragHandle()
+      },
+      initializeDragHandle: function(){ // Starting to look like this needs its own DragHandle class?
+        if(!this.$drag_handle.data('hooch.drag_handle_initialized')){
+          this.$drag_handle.css({cursor: 'move'});
+          var sort_element = this
+          this.$drag_handle.on('mousedown touchstart', $.proxy(sort_element.onMousedown, sort_element))
+          this.$drag_handle.data('hooch.drag_handle_initialized',true)
         }
       },
       createPlaceHolder: function(){
@@ -2018,9 +2021,9 @@ var initHooch = function(){
   };
   hooch.SortPlaceholder = hooch.SortElement.extend({
     init: function($sort_element,sort_element){
-      var new_uuid = new UUID
       //////////////////////////////////////////
       // Helpful for debugging in the browser
+      // var new_uuid = new UUID
       // this.uniq_id = new_uuid.value
       //////////////////////////////////////////
 
