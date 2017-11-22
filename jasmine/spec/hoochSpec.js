@@ -1,3 +1,4 @@
+jasmine.getFixtures().fixturesPath = 'base/fixtures'
 MutationObserver = Class.extend({
   init: function(callback){},
   observe: function(elem,config){}
@@ -5,6 +6,9 @@ MutationObserver = Class.extend({
 String.prototype.startsWith = function(prefix) {
     return this.slice(0, prefix.length) == prefix;
 }
+// stub out any_time_mananger
+window.any_time_manager = {recordedObjects: {'hooch.Sorter': []}}
+
 describe("hooch", function() {
 
   it("Emptier", function() {
@@ -241,7 +245,6 @@ describe("hooch", function() {
   it('Revealer', function(){
     RevealerTest("Revealer");
   })
-
   describe('Sorter',function(){
     beforeEach(function(){
       $sorter = affix('div[data-sorter][style="width: 300px;"]')
@@ -249,7 +252,6 @@ describe("hooch", function() {
       $sort_elem_b = $sorter.affix('div#b[style="width: 100px; height: 100px; position:relative; float:left;"]')
       $sort_elem_c = $sorter.affix('div#c[style="width: 100px; height: 100px; position:relative; float:left;"]')
       $sort_elem_d = $sorter.affix('div#d[style="width: 100px; height: 100px; position:relative; float:left;"]')
-
       sorter = new hooch.Sorter($sorter)
       sort_elem_a = $.grep(sorter.sort_elements, function(elem,i){
         return 'a' == elem.$sort_element.attr('id')
@@ -263,6 +265,13 @@ describe("hooch", function() {
       sort_elem_d = $.grep(sorter.sort_elements, function(elem,i){
         return 'd' == elem.$sort_element.attr('id')
       })[0]
+    })
+    afterEach(function(){
+      $sorter.remove()
+      $sort_elem_a.remove()
+      $sort_elem_b.remove()
+      $sort_elem_c.remove()
+      $sort_elem_d.remove()
     })
     it('sets the correct sort geometry', function(){
       //The fixtures for this test float horizontally into a grid three-wide, therefore the sorter should choose a 'Grid'
@@ -294,56 +303,6 @@ describe("hooch", function() {
       })[0]
       expect(sort_elem_with_handle.$drag_handle.attr('id')).toEqual('the_handle')
     })
-    it('Handles the initial mousemove when dragging an element', function(){
-      sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
-      sorter.onMousemove({originalEvent: {pageY: 10, pageX: 11}})
-      //Starting to move the mouse will unset the pressed flag so we don't try to initialize the movement again.
-      expect(sort_elem_a.pressed).toBe(false)
-      //We set the dragging element for the sorter to be element 'a'
-      expect(sorter.dragging_element.$sort_element.attr('id')).toEqual('a')
-      //We created a placeholder for element a
-      expect(sort_elem_a.placeholder.is_placeholder).toBe(true)
-
-      var elem_before_b = sort_elem_b.$sort_element.prev()
-      //The dom element for the placeholder had it's id removed to avoid duplication
-      expect(elem_before_b.attr('id')).toBeUndefined()
-      //The dom element for the placeholder is now in the dom just before 'b', holding the place of the real 'a' as it is being dragged
-      expect(elem_before_b.is(sort_elem_a.placeholder.$sort_element)).toBe(true)
-      //The real element 'a' is now attached directly to the body
-      expect(sort_elem_a.$sort_element.parent()[0].nodeName).toEqual('BODY')
-
-    })
-    it('Handles mousemove when dragging an element', function(){
-      sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
-      sorter.onMousemove({originalEvent: {pageY: 10, pageX: 110}})
-      var elem_before_c = sort_elem_c.$sort_element.prev()
-      //The dom element for the placeholder is now in the dom just before 'c'
-      expect(elem_before_c.is(sort_elem_a.placeholder.$sort_element)).toBe(true)
-      //element 'b' is now the first in line, since a has shifted one forward
-      expect(sorter.$sorter.children(':first').attr('id')).toEqual('b')
-    })
-    it('Handles dragging below the bottom of the grid', function(){
-      sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
-      sorter.onMousemove({originalEvent: {pageY: 210, pageX: 10}})
-      last_elem = sorter.$sorter.children(':last')
-      //Dragging below the bottom of the grid puts the placeholder in the last place in the list
-      expect(sort_elem_a.placeholder.$sort_element.is(last_elem)).toBe(true)
-    })
-    it('Handles dropping an element', function(){
-      sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
-      sorter.onMousemove({originalEvent: {pageY: 210, pageX: 10}})
-      sorter.onMouseup()
-      last_elem = sorter.$sorter.children(':last')
-      //Now the real element 'a' is in last place after being dragged below the sorter
-      expect(sort_elem_a.$sort_element.is(last_elem)).toBe(true)
-    })
-    it('Handles a click without a drag', function(){
-      sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
-      sorter.onMouseup()
-      expect(sorter.dragging_element).toBeUndefined()
-      var pressed_element = sorter.getPressedElement()
-      expect(pressed_element).toBe(false)
-    })
     it('Builds form data', function(){
       sorter.$sorter.attr('data-sort-field','my_sort')
       form_data = sorter.getFormData()
@@ -351,7 +310,7 @@ describe("hooch", function() {
     })
     it('dynamically adds sort elements', function(){
       var $sort_elem_e = $sorter.affix('div#e[style="width: 100px; height: 100px; position:relative; float:left;"]')
-      sorter.handleMutations([{addedNodes: [$sort_elem_e[0]], removedNodes: []}])
+      sorter.onMutation([{addedNodes: [$sort_elem_e[0]], removedNodes: []}])
       var sort_elem_e = $.grep(sorter.sort_elements, function(elem,i){
         return 'e' == elem.$sort_element.attr('id')
       })[0]
@@ -359,15 +318,107 @@ describe("hooch", function() {
     })
     it('dynamically removes sort elements', function(){
       $sort_elem_c.detach()
-      sorter.handleMutations([{addedNodes: [], removedNodes: [$sort_elem_c[0]]}])
+      sorter.onMutation([{addedNodes: [], removedNodes: [$sort_elem_c[0]]}])
       var sort_elem_c = $.grep(sorter.sort_elements, function(elem,i){
         return 'c' == elem.$sort_element.attr('id')
       })[0]
       expect(sort_elem_c).toBeUndefined()
       expect(sorter.sort_elements.length).toEqual(3)
     })
-  })
+    describe('SortElement', function(){
+      it('Handles the initial mousemove when dragging an element', function(){
+        sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
+        sort_elem_a.onMousemove({originalEvent: {pageY: 10, pageX: 11}})
+        //Starting to move the mouse will unset the pressed flag so we don't try to initialize the movement again.
+        expect(sort_elem_a.pressed).toBe(false)
+        //We set the dragging element for the sorter to be element 'a'
+        expect(sorter.dragging_element.$sort_element.attr('id')).toEqual('a')
+        //We created a placeholder for element a
+        expect(sort_elem_a.placeholder.is_placeholder).toBe(true)
 
+        var elem_before_b = sort_elem_b.$sort_element.prev()
+        //The dom element for the placeholder had it's id removed to avoid duplication
+        expect(elem_before_b.attr('id')).toBeUndefined()
+        //The dom element for the placeholder is now in the dom just before 'b', holding the place of the real 'a' as it is being dragged
+        expect(elem_before_b.is(sort_elem_a.placeholder.$sort_element)).toBe(true)
+        //The real element 'a' is now attached directly to the body
+        expect(sort_elem_a.$sort_element.parent()[0].nodeName).toEqual('BODY')
+
+      })
+      it('Handles mousemove when dragging an element', function(){
+        sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
+        sort_elem_a.onMousemove({originalEvent: {pageY: 10, pageX: 110}})
+        var elem_before_c = sort_elem_c.$sort_element.prev()
+        //The dom element for the placeholder is now in the dom just before 'c'
+        expect(elem_before_c.is(sort_elem_a.placeholder.$sort_element)).toBe(true)
+        //element 'b' is now the first in line, since a has shifted one forward
+        expect(sorter.$sorter.children(':first').attr('id')).toEqual('b')
+      })
+      it('Handles dragging below the bottom of the grid', function(){
+        sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
+        sort_elem_a.onMousemove({originalEvent: {pageY: 210, pageX: 10}})
+        last_elem = sorter.$sorter.children(':last')
+        //Dragging below the bottom of the grid puts the placeholder in the last place in the list
+        expect(sort_elem_a.placeholder.$sort_element.is(last_elem)).toBe(true)
+      })
+      it('Handles a click without a drag', function(){
+        sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
+        sort_elem_a.onMouseup()
+        expect(sorter.dragging_element).toBeUndefined()
+        var pressed_element = sorter.getPressedElement()
+        expect(pressed_element).toBe(false)
+      })
+      it('Handles dropping an element', function(){
+        sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
+        sort_elem_a.onMousemove({originalEvent: {pageY: 210, pageX: 10}})
+        sort_elem_a.onMouseup()
+        last_elem = sorter.$sorter.children(':last')
+        //Now the real element 'a' is in last place after being dragged below the sorter
+        expect(sort_elem_a.$sort_element.is(last_elem)).toBe(true)
+      })
+    })
+  })
+  describe('SoloSortElement', function(){
+    beforeEach(function(){
+      loadFixtures('solo_sort_elements.html')
+      $sort_elem_a = $('div#thing_a')
+      $sort_elem_b = $('div#thing_b')
+      $sorter = $('div#sorter')
+      $sort_elem_c = $('div#thing_c')
+      $sort_elem_d = $('div#thing_d')
+      sort_elem_a = new hooch.SortElement($sort_elem_a)
+      sort_elem_b = new hooch.SortElement($sort_elem_b)
+      sorter = new hooch.Sorter($sorter)
+      sort_elem_c = $.grep(sorter.sort_elements, function(elem,i){
+        return 'thing_c' == elem.$sort_element.attr('id')
+      })[0]
+      sort_elem_d = $.grep(sorter.sort_elements, function(elem,i){
+        return 'thing_d' == elem.$sort_element.attr('id')
+      })[0]
+    })
+    it('attaches to a sorter', function(){
+      //Stub out any_time_manager's map of objects with our sorter so the elements can find it
+      window.any_time_manager.recordedObjects['hooch.Sorter'] = [sorter]
+      sort_elem_a.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
+      sort_elem_a.onMousemove({originalEvent: {pageY: 250, pageX: 10}})
+      sort_elem_a.onMouseup({})
+
+      //The sorter will send the new list with sort_elem_a in the correct position
+      var expected_output = { thing: [ 'c', 'a', 'd' ] }
+      expect(sorter.getFormData()).toEqual(expected_output)
+    })
+    it('ignores a non-matching sorter', function(){
+      //Stub out any_time_manager's map of objects with our sorter so the elements can find it
+      window.any_time_manager.recordedObjects['hooch.Sorter'] = [sorter]
+      sort_elem_b.onMousedown({which: 1, originalEvent: {pageY: 10, pageX: 10}})
+      sort_elem_b.onMousemove({originalEvent: {pageY: 250, pageX: 10}})
+      sort_elem_a.onMouseup({})
+
+      //The sorter will send the new list without sort_elem_b
+      var expected_output = { thing: [ 'c', 'd' ] }
+      expect(sorter.getFormData()).toEqual(expected_output)
+    })    
+  })
   describe('BindKey', function(){
     it('submits a form', function(){
       var form = affix('form[data-bind-key="up"]')

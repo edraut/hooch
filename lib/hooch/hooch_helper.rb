@@ -1,6 +1,13 @@
 module Hooch
   module HoochHelper
     def tab_set(name, type: nil, default_tab: nil, no_history: nil, preload_tabs: nil)
+      param_key = name.to_sym
+      clean_params = params.permit!.to_hash.symbolize_keys
+      if clean_params[param_key].present?
+        default_tab = clean_params[param_key].to_s
+      else
+        default_tab = default_tab
+      end
       if :ajax == type
         type = 'AjaxTabGroup'
       end
@@ -260,6 +267,25 @@ module Hooch
 
     def bind_key_attrs(key_name)
       "data-bind-key=\"#{key_name}\"".html_safe
+    end
+
+    def sorter(polymorphic_id: nil, recipient_filters: nil, href: nil)
+      attrs = "data-sorter=true"
+      attrs += " data-recipient-filters=#{recipient_filters}" if recipient_filters
+      attrs += " data-polymorphic-id=#{polymorphic_id}" if polymorphic_id
+      attrs += " href=#{href}" if href
+      attrs
+    end
+
+    def solo_sort_element(reusable: false, target_filters: nil)
+      attrs = "data-sort-element=true"
+      attrs += " data-target-filters=#{target_filters}" if target_filters
+      attrs += " data-sort-reusable=true" if reusable
+      attrs
+    end
+
+    def send_sort_now
+      "data-send-sort-now"
     end
   end
 end
