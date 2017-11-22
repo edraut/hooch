@@ -45,6 +45,17 @@ Set.from_iterable = function(arr) {
   }
   return new_set
 }
+if(typeof UUID == 'undefined'){
+  var UUID = Class.extend({
+    init: function(){
+      this.value = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+        return v.toString(16);
+      });
+    }
+  })
+
+}
 var initHooch = function(){
   hooch = {
     Emptier: Class.extend({
@@ -1504,7 +1515,7 @@ var initHooch = function(){
         } else {
           var first_id = id_array[0]
           var last_underscore_location = first_id.lastIndexOf('_')
-          var array_name = first_id.slice(0,last_underscore_location)          
+          var array_name = first_id.slice(0,last_underscore_location)
           form_data[array_name] = id_array.map(function(id){
             return id.slice((last_underscore_location + 1))
           })
@@ -1576,7 +1587,7 @@ var initHooch = function(){
         // None of these can be present to match
         var none = true
         for(var key in element_filters.none){
-          if(!this.recipient_filters.hasOwnProperty(key)){continue}
+          if(!this.recipient_filters.hasOwnProperty(key)) continue
           var exclude_source = Set.from_iterable(this.recipient_filters[key])
           var exclude_test = Set.from_iterable(element_filters.none[key])
           if(exclude_source.intersection(exclude_test).size != 0){
@@ -1698,8 +1709,8 @@ var initHooch = function(){
         if(this.pressed){this.setDragging()}
         if(this.dragging){
           hooch.pauseEvent(e)
-          var target_sorter = this.targetSorter(e)
           this.setPosition(e)
+          var target_sorter = this.targetSorter(e)
           if(target_sorter){
             this.attachToSorter(target_sorter,e)
           } else if(this.sorter){
