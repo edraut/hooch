@@ -182,11 +182,25 @@ var initHooch = function(){
     }),
     ModalTrigger: Class.extend({
       init: function($modal_trigger){
+        this.$modal_trigger = $modal_trigger
         this.$modal_content = $($modal_trigger.data('content-target'))
         var modal_trigger = this
         $modal_trigger.on('click', function(){
+          modal_trigger.instantiate('before')
           new hooch.Modal(modal_trigger.$modal_content)
+          modal_trigger.instantiate('after')
         })
+      },
+      instantiate: function(timing){
+        var instantiate_class_name = 'instantiate-' + timing + '-class'
+        var instantiate_selector_name = 'instantiate-' + timing + '-selector'
+        var instantiate_class = this.$modal_trigger.data(instantiate_class_name)
+        var instantiate_selector = this.$modal_trigger.data(instantiate_selector_name)
+        if(instantiate_class && instantiate_selector){
+          if(klass = eval(instantiate_class)){
+            new klass($(instantiate_selector))
+          }
+        }
       }
     }),
     ModalDismisser: Class.extend({
