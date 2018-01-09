@@ -1,3 +1,6 @@
+//= require simple_inheritance
+//= require debug_logger
+
 Set.prototype.isSuperset = function(subset) {
   var this_set = this
   subset.forEach (function(elem) {
@@ -550,7 +553,7 @@ var initHooch = function(){
           tab_group.tab_triggers_by_id[new_tab.tab_id] = new_tab;
         })
         if(this.tab_triggers.length == 0){
-          console.log("WARNING: hooch could not find any tab triggers for the tab set named '" + this.name + "'")
+          debug_logger.log("WARNING: hooch could not find any tab triggers for the tab set named '" + this.name + "'", 1, "hooch")
         }
       },
       getTabByPushState: function(state_value){
@@ -573,7 +576,7 @@ var initHooch = function(){
         if(default_tab_name){
           this.default_tab = this.tab_triggers_by_id[default_tab_name];
           if(!this.default_tab){
-            console.log("WARNING: hooch could not find the tab " + default_tab_name + " for tab set " + this.name)
+            debug_logger.log("WARNING: hooch could not find the tab " + default_tab_name + " for tab set " + this.name, 1, "hooch")
           } else {
             this.default_tab.toggleTarget(this.state_behavior);
           }
@@ -982,7 +985,7 @@ var initHooch = function(){
         var form_selector = this.$fake_checkbox.data('form-selector')
         var $form = $(form_selector)
         if($form.length == 0){
-          console.log("WARNING: hooch.FakeCheckbox could not find the form with the selector '" + form_selector + "'")
+          debug_logger.log("WARNING: hooch.FakeCheckbox could not find the form with the selector '" + form_selector + "'", 1, "hooch")
         }
         var toggleable_selector = this.$fake_checkbox.data('toggle-form')
         if(toggleable_selector == true || toggleable_selector == 'true'){
@@ -1999,13 +2002,13 @@ var initHooch = function(){
         this.element_type = $bound_element.get(0).nodeName.toLowerCase()
         this.key_name = $bound_element.data('bind-key')
         if(!this.key_name){
-          console.log("Warning! Hooch key binder couldn't find a key name to bind")
+          debug_logger.log("Warning! Hooch key binder couldn't find a key name to bind", 1, "hooch")
           return
         }
         var key_binder = this
         var codes = $.grep(Object.keys(hooch.key_code_map), function(code){return (hooch.key_code_map[code] == key_binder.key_name)})
         if(codes.length < 1){
-          console.log('Warning! Hooch key binder could not find a key to bind for the key name ' + this.key_name)
+          debug_logger.log('Warning! Hooch key binder could not find a key to bind for the key name ' + this.key_name, 1, "hooch")
           return
         }
         $(window).on('keyup', function(e){key_binder.do_it_now(e)} )
