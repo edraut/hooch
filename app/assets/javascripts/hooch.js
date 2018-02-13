@@ -526,8 +526,9 @@ var initHooch = function(){
       },
       bindEvent: function(){
         var revealer = this;
-        this.$revealer.bind('change',function(){
+        this.$revealer.on('change',function(){
           revealer.reveal();
+          return true
         });
       }
     }),
@@ -799,7 +800,7 @@ var initHooch = function(){
             switch($proxy.attr('type')){
               case 'checkbox':
               default:
-                $proxy.on('change',function(){
+                $proxy.on('change click',function(){
                   go_proxy.doItNow();
                 })
               break;
@@ -852,6 +853,7 @@ var initHooch = function(){
           }else{
             checkbox_proxy.check();
           }
+          return true
         })
       },
       uncheck: function(){
@@ -2232,6 +2234,7 @@ var initHooch = function(){
         }
         this.first_submit = false;
       }
+      return true
     }
   });
   hooch.SubmitProxy = hooch.GoProxy.extend({
@@ -2247,6 +2250,7 @@ var initHooch = function(){
         this.target.submit();
         this.first_submit = false;
       }
+      return true
     }
   });
   hooch.TabGroup.addGroup = function(group){
