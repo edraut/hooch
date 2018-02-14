@@ -245,7 +245,7 @@ var initHooch = function(){
       },
       getContentWrapper: function(){
         this.$modal_wrapper = this.$modal_mask.find('#hooch-modal')
-        this.$modal_element = $('<div/>', {id: 'hooch_content', style: 'position: relative; float: left;'})
+        this.$modal_element = $('<div/>', {id: 'hooch_content', style: 'position: relative; float: left; height: ' + (this.mask_height - 100) + 'px;'})
         this.$modal_wrapper.html(this.$modal_element)
         this.$modal_element.html(this.$modal_content)
         this.$modal_content.show()
@@ -268,34 +268,9 @@ var initHooch = function(){
         modal.old_height = $('body')[0].style.height
         modal.old_overflow = $('body')[0].style.overflow
         $('body').css({height: '100%',overflow: 'hidden'})
-        $('body').on({
-          'mousewheel.hoochModalScroll DOMMouseScroll.hoochModalScroll': function(e) {
-            if(($(e.target).attr('id') == 'hooch-content') || ($(e.target).parents('#hooch-content').length > 0)){
-              var delta = e.originalEvent.wheelDelta
-              new_scrolltop = $('#hooch-content').scrollTop() - delta
-              $('#hooch-content').scrollTop(new_scrolltop)
-            }
-            e.preventDefault();
-          }
-        })
-        if (window.addEventListener){ // older FF
-          window.addEventListener('DOMMouseScroll', hooch.preventDefault, false)
-        }
-        window.onwheel = hooch.preventDefault; // modern standard
-        window.onmousewheel = document.onmousewheel = hooch.preventDefault; // older browsers, IE
-        window.ontouchmove  = hooch.preventDefault; // mobile
-        document.onkeydown  = hooch.preventDefaultForScrollKeys;
       },
       enableScroll: function(){
         $('body').css({height: this.old_height, overflow: this.old_overflow})
-        $('body').off('.hoochModalScroll')
-        if (window.removeEventListener){
-          window.removeEventListener('DOMMouseScroll', hooch.preventDefault, false);
-        }
-        window.onmousewheel = document.onmousewheel = null;
-        window.onwheel = null;
-        window.ontouchmove = null;
-        document.onkeydown = null;
       }
     }),
     closeModal: function(){
