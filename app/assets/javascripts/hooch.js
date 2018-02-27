@@ -850,8 +850,30 @@ var initHooch = function(){
     }),
     Link: Class.extend({
       init: function($link){
-        $link.click(function(){
-          window.location = $link.attr('href');
+        this.$link = $link;
+        this.getTarget()
+        this.bindLink()
+      },
+      getTarget: function($link){
+        this.target = this.$link.data('link-target')
+      },
+      bindLink: function(){
+        if(this.target){
+          this.bindWithTarget()
+        } else {
+          this.bindWithoutTarget()
+        }
+      },
+      bindWithTarget: function(){
+        var link = this
+        this.$link.on('click', function(){
+          window.open(link.$link.attr('href'), this.$target)
+        })
+      },
+      bindWithoutTarget: function(){
+        var link = this
+        this.$link.on('click', function(){
+          window.location = link.$link.attr('href');
         })
       }
     }),
