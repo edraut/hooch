@@ -1482,6 +1482,7 @@ var initHooch = function(){
         this.getSortElements()
       },
       dropDraggingElement: function(){
+        this.maskMe()
         this.reinsertDraggingElement()
         this.sendSort()
       },
@@ -1493,33 +1494,23 @@ var initHooch = function(){
           this.refreshGrid();
         }
       },
-      getProgressTarget: function(){
-        if(this.$progress_target) return
-        if(this.$sorter.data('progress-target')){
-          this.$progress_target = $(this.$sorter.data('progress-target'))
-        }
+      maskMe: function(){
+        this.mask = new thin_man.AjaxMask(this.$sorter,'')
       },
-      startProgressIndicator: function(){
-        this.getProgressTarget()
-        if(this.$progress_target){
-          this.progress_indicator = new thin_man.AjaxProgress(this.$progress_target,this.$sorter,'black')
-        }
-      },
-      stopProgressIndicator: function(){
-        if(this.progress_indicator){
-          this.progress_indicator.stop()
-          delete this.progress_indicator
+      unMaskMe: function(){
+        if(this.mask){
+          this.mask.remove()
+          delete this.mask
         }
       },
       sendSort: function(){
-        this.startProgressIndicator()
         var sorter = this
         $.ajax({
           url: this.$sorter.attr('href'),
           method: 'PATCH',
           data: this.getFormData(),
           complete: function(jqXHR) {
-            sorter.stopProgressIndicator()
+            sorter.unMaskMe()
           }
         })
       },
