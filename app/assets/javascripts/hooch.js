@@ -935,9 +935,22 @@ var initHooch = function(){
     }),
     PageReloader: Class.extend({
       init: function($reloader){
+        var reloadUrl = this.addBrowserId()
         $reloader.on('click', function(){
-          window.location.reload(true)
+          window.location.assign(reloadUrl)
         })
+      },
+      addBrowserId: function(){
+        var browserTabId = $("meta[name='browser_tab_id']").attr("content");
+        var str = "";
+        if (window.location.search.length == 0) {
+            str = "?"
+        } else {
+            str = "&"
+        }
+        str += "browser_tab_id=" + browserTabId;
+        return (window.location.origin + window.location.pathname + window.location.search + str + window.location.hash);
+        
       }
     }),
     FakeCheckbox: Class.extend({
