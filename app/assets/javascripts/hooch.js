@@ -944,8 +944,8 @@ var initHooch = function(){
       init: function($fake_checkbox){
         this.$fake_checkbox = $fake_checkbox
         this.$form = this.getForm()
-        this.prepDeselectors()
         this.prepSelectors()
+        this.prepDeselectors()
         this.$field = this.getField()
         var fake_checkbox = this
         this.$fake_checkbox.click(function(){ fake_checkbox.change() })
