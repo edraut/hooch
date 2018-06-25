@@ -195,6 +195,18 @@ module Hooch
       end
     end
 
+    def fake_select
+      {}.tap do |params|
+        params['data-fake-selector'] = true
+      end
+    end
+
+    def fake_select_attrs
+      ''.tap do |attrs|
+        attrs.concat 'data-fake-selector=true'
+      end
+    end
+
     def field_filler(target, value)
       ''.tap do |attrs|
         attrs.concat 'data-field-filler=true'

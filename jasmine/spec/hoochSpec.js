@@ -197,6 +197,17 @@ describe("hooch", function() {
       expect($fake_checkbox.hasClass('checked')).toBe(false)
       expect($form.is(':visible')).toEqual(false)
     })
+    it("selects all checkboxes", function(){
+      var $form = affix('form#target_form')
+      var $selector = affix('a[data-fake-selector="true"]')
+      var $fake_checkbox = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"][data-field-name="like_candy"][data-field-value="true"][data-toggle-form=true]')
+      var fake_checkbox = new hooch.FakeCheckbox($fake_checkbox)
+      expect($fake_checkbox.hasClass('checked')).toBe(false)
+      expect($form.is(':visible')).toEqual(false)
+      $selector.trigger('click')
+      expect($fake_checkbox.hasClass('checked')).toBe(true)
+      expect($form.is(':visible')).toEqual(true)
+    })
   });
   it('FakeSelect', function(){
     it('acts as a fake select', function(){
