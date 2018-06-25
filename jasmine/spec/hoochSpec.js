@@ -209,7 +209,7 @@ describe("hooch", function() {
       expect($form.is(':visible')).toEqual(true)
     })
   });
-  describe('FakeSelect', function(){
+  it('FakeSelect', function(){
     it('acts as a fake select', function(){
       FakeSelectTest("FakeSelect");
     });
