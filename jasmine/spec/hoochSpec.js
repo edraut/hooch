@@ -202,11 +202,12 @@ describe("hooch", function() {
       var $selector = affix('a[data-fake-selector="true"]')
       var $fake_checkbox = affix('div[data-fake-checkbox="true"][data-form-selector="#target_form"][data-field-name="like_candy"][data-field-value="true"][data-toggle-form=true]')
       var fake_checkbox = new hooch.FakeCheckbox($fake_checkbox)
+      fake_checkbox.deselect()
       expect($fake_checkbox.hasClass('checked')).toBe(false)
       expect($form.is(':visible')).toEqual(false)
       $selector.trigger('click')
       expect($fake_checkbox.hasClass('checked')).toBe(true)
-      // expect($form.is(':visible')).toEqual(true)
+      expect($form.is(':visible')).toEqual(true)
     })
   });
   it('FakeSelect', function(){
