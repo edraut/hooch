@@ -945,6 +945,7 @@ var initHooch = function(){
         this.$fake_checkbox = $fake_checkbox
         this.$form = this.getForm()
         this.prepDeselectors()
+        this.prepSelectors()
         this.$field = this.getField()
         var fake_checkbox = this
         this.$fake_checkbox.click(function(){ fake_checkbox.change() })
@@ -1005,6 +1006,15 @@ var initHooch = function(){
         $deselector.on('click', function(){
           if(fake_checkbox.$fake_checkbox.hasClass('checked')){
             fake_checkbox.deselect()
+          }
+        })
+      },
+      prepSelectors: function(){
+        var $selector = $('body').find('[data-fake-selector]')
+        var fake_checkbox = this
+        $selector.on('click', function(){
+          if(!(fake_checkbox.$fake_checkbox.hasClass('checked'))){
+            fake_checkbox.select()
           }
         })
       },
