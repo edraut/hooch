@@ -183,27 +183,32 @@ module Hooch
       end
     end
     
-    def fake_deselect
+    def fake_deselect(form_selector=nil)
       {}.tap do |params|
+        params['data-form-selector'] = form_selector
         params['data-fake-deselector'] = true
+        
       end
     end
 
-    def fake_deselect_attrs
+    def fake_deselect_attrs(form_selector=nil)
       ''.tap do |attrs|
         attrs.concat 'data-fake-deselector=true'
+        attrs.concat " data-form-selector=#{form_selector}"
       end
     end
 
-    def fake_select
+    def fake_select(form_selector=nil)
       {}.tap do |params|
+        params['data-form-selector'] = form_selector
         params['data-fake-selector'] = true
       end
     end
 
-    def fake_select_attrs
+    def fake_select_attrs(form_selector=nil)
       ''.tap do |attrs|
         attrs.concat 'data-fake-selector=true'
+        attrs.concat " data-form-selector=#{form_selector}"
       end
     end
 

@@ -1001,7 +1001,8 @@ var initHooch = function(){
         return $form
       },
       prepDeselectors: function(){
-        var $deselector = this.$form.find('[data-fake-deselector]')
+        var formSelector = this.$form.selector
+        var $deselector = $('body').find('[data-fake-deselector="true"][data-form-selector="'+ formSelector + '"]')
         var fake_checkbox = this
         $deselector.on('click', function(){
           if(fake_checkbox.$fake_checkbox.hasClass('checked')){
@@ -1010,7 +1011,8 @@ var initHooch = function(){
         })
       },
       prepSelectors: function(){
-        var $selector = $('body').find('[data-fake-selector]')
+        var formSelector = this.$form.selector
+        var $selector = $('body').find('[data-fake-selector="true"][data-form-selector="'+ formSelector + '"]')
         var fake_checkbox = this
         $selector.on('click', function(){
           if(!(fake_checkbox.$fake_checkbox.hasClass('checked'))){
