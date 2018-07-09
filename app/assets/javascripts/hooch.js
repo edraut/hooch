@@ -2228,7 +2228,11 @@ var initHooch = function(){
         if(this.target.data('ajax-target')){
           this.target.click();
         }else if(this.target.attr('href')){
-          window.location = this.target.attr('href');
+          if ("_blank" === this.target.attr('target')){
+            window.open(this.target.attr('href'));
+          }else{
+            window.location = this.target.attr('href');
+          }
         }
         this.first_submit = false;
       }
