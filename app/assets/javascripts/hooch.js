@@ -936,7 +936,10 @@ var initHooch = function(){
     PageReloader: Class.extend({
       init: function($reloader){
         $reloader.on('click', function(){
-          window.location.reload(true)
+          var browserTabId = $("meta[name='browser_tab_id']").attr("content");
+          var location = window.location.href
+          var reloadLink = location + "&browser_tab_id=" + browserTabId
+          window.location.assign(reloadLink)
         })
       }
     }),
