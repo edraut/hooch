@@ -187,10 +187,11 @@ var initHooch = function(){
       init: function($modal_trigger){
         this.$modal_trigger = $modal_trigger
         this.$modal_content = $($modal_trigger.data('content-target'))
+        this.dismissable = $modal_trigger.data('dismissable')
         var modal_trigger = this
         $modal_trigger.on('click', function(){
           modal_trigger.instantiate('before')
-          new hooch.Modal(modal_trigger.$modal_content)
+          new hooch.Modal(modal_trigger.$modal_content, this.dismissable)
           modal_trigger.instantiate('after')
         })
       },
@@ -223,8 +224,9 @@ var initHooch = function(){
       }
     }),
     Modal: Class.extend({
-      init: function($modal_content){
+      init: function($modal_content,dismissable){
         this.$modal_content = $modal_content
+        this.dismissable = dismissable
         this.getMask()
         this.getDismisser()
         this.getContentWrapper()
@@ -235,27 +237,23 @@ var initHooch = function(){
         this.$modal_content.trigger('modalVisible')
       },
       getMask: function(){
-        this.mask_top = $(window).scrollTop()
-        this.mask_height = $(window).height()
         this.$modal_mask = $('#hooch-mask')
-        this.$modal_mask.css({height: this.mask_height + 'px', top: this.mask_top + 'px',
-          position: 'absolute', 'z-index': 100000,
-          left: 0, right: 0, bottom: 0
-        })
       },
       getContentWrapper: function(){
         this.$modal_wrapper = this.$modal_mask.find('#hooch-modal')
-        this.$modal_element = $('<div/>', {id: 'hooch_content', style: 'position: relative; float: left; height: ' + (this.mask_height - 100) + 'px;'})
-        this.$modal_wrapper.html(this.$modal_element)
-        this.$modal_element.html(this.$modal_content)
+        this.$modal_wrapper.html(this.$modal_content)
         this.$modal_content.show()
       },
       getDismisser: function(){
-        this.$dismisser = this.$modal_mask.find('#hooch-dismiss')
+        if(this.dismissable){
+          this.$dismisser = this.$modal_mask.find('#hooch-dismiss')        
+        }
       },
       attachDismisser: function(){
-        this.$modal_wrapper.append(this.$dismisser)
-        this.dismisser = new hooch.ModalDismisser(this.$dismisser,this)
+        if(this.dismissable){
+          this.$modal_wrapper.append(this.$dismisser)
+          this.dismisser = new hooch.ModalDismisser(this.$dismisser,this)
+        }
       },
       close: function(){
         this.$modal_mask.hide()
@@ -278,6 +276,13 @@ var initHooch = function(){
         hooch.dismisser.dismissModal()
       }
     },
+    ModalNow: Class.extend({
+      init: function($modal_trigger){
+        this.$modal_content = $($modal_trigger.data('content-target'))
+        this.dismissable = $modal_trigger.data('dismissable')
+        new hooch.Modal(this.$modal_content, this.dismissable)
+      }
+    }),
     Expandable: Class.extend({
       init: function($expandable){
         var expandable = this;
@@ -930,7 +935,7 @@ var initHooch = function(){
     }),
     ReloadPage: Class.extend({
       init: function(reload_page){
-        window.location.href = reload_page;
+        window.location.assign(reload_page);
       }
     }),
     PageReloader: Class.extend({
@@ -2281,7 +2286,7 @@ var initHooch = function(){
       ['hover_overflow','hidey_button','hide-show','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
         'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-checkbox', 'fake-select', 'select-action-changer',
-        'sorter', 'sort-element', 'bind-key','modal-trigger','history-pusher', 'history-replacer', 'link', 'atarget',
+        'sorter', 'sort-element', 'bind-key','modal-trigger','modal-now','history-pusher', 'history-replacer', 'link', 'atarget',
         'page-reloader'],'hooch');
     window.any_time_manager.load();
   };

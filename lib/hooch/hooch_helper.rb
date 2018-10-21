@@ -33,9 +33,18 @@ module Hooch
       attrs = 'data-tab-id=' + id
     end
 
-    def modal_trigger(target)
+    def modal_trigger(target, dismissable: true)
       attrs = 'data-modal-trigger=true'
       attrs += " data-content-target=#{target}"
+      attrs += " data-dismissable=true" if dismissable
+      attrs
+    end
+
+    def modal_now(target, dismissable: true)
+      attrs = 'data-modal-now=true'
+      attrs += " data-content-target=#{target}"
+      attrs += " data-dismissable=true" if dismissable
+      attrs
     end
 
     def hide_show(target, any_click_closes: false)
