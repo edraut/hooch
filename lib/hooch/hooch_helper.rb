@@ -40,10 +40,17 @@ module Hooch
       attrs
     end
 
-    def modal_now(target, dismissable: true)
+    def modal_now(target, dismissable: true, delay: 0)
       attrs = 'data-modal-now=true'
       attrs += " data-content-target=#{target}"
+      attrs += " data-delay=#{delay}"
       attrs += " data-dismissable=true" if dismissable
+      attrs
+    end
+
+    def modal_closer(milliseconds: 0)
+      attrs = 'data-modal-closer=true'
+      attrs += " data-milliseconds=#{milliseconds}"
       attrs
     end
 

@@ -234,6 +234,7 @@ var initHooch = function(){
         this.disableScroll()
         this.$modal_content.trigger('modalInitialized')
         this.$modal_mask.show()
+        hooch.current_modal = this
         this.$modal_content.trigger('modalVisible')
       },
       getMask: function(){
@@ -245,14 +246,12 @@ var initHooch = function(){
         this.$modal_content.show()
       },
       getDismisser: function(){
-        if(this.dismissable){
-          this.$dismisser = this.$modal_mask.find('#hooch-dismiss')        
-        }
+        this.$dismisser = this.$modal_mask.find('#hooch-dismiss')        
+        this.dismisser = new hooch.ModalDismisser(this.$dismisser,this)
       },
       attachDismisser: function(){
         if(this.dismissable){
           this.$modal_wrapper.append(this.$dismisser)
-          this.dismisser = new hooch.ModalDismisser(this.$dismisser,this)
         }
       },
       close: function(){
@@ -276,11 +275,33 @@ var initHooch = function(){
         hooch.dismisser.dismissModal()
       }
     },
+    attachModalDismisser: function(){
+      if(hooch.current_modal){
+        hooch.current_modal.dismissable = true
+        hooch.current_modal.attachDismisser()
+      }
+    },
     ModalNow: Class.extend({
       init: function($modal_trigger){
         this.$modal_content = $($modal_trigger.data('content-target'))
+        this.delay = $modal_trigger.data('delay')
         this.dismissable = $modal_trigger.data('dismissable')
-        new hooch.Modal(this.$modal_content, this.dismissable)
+        var modal_now = this
+        if(this.delay > 0){
+          setTimeout(function(){new hooch.Modal(modal_now.$modal_content, modal_now.dismissable)}, delay)
+        } else {
+          new hooch.Modal(this.$modal_content, this.dismissable)
+        }
+      }
+    }),
+    ModalCloser: Class.extend({
+      init: function($modal_closer){
+        var milliseconds = $modal_closer.data('milliseconds')
+        if(milliseconds > 0){
+          setTimeout(function(){hooch.closeModal()},milliseconds)
+        } else {
+          hooch.closeModal()
+        }
       }
     }),
     Expandable: Class.extend({
@@ -2286,7 +2307,7 @@ var initHooch = function(){
       ['hover_overflow','hidey_button','hide-show','submit-proxy','click-proxy','field-filler','revealer',
         'checkbox-hidden-proxy','prevent-double-submit','prevent-double-link-click', 'tab-group',
         'hover-reveal', 'emptier', 'remover', 'checkbox-proxy', 'fake-checkbox', 'fake-select', 'select-action-changer',
-        'sorter', 'sort-element', 'bind-key','modal-trigger','modal-now','history-pusher', 'history-replacer', 'link', 'atarget',
+        'sorter', 'sort-element', 'bind-key','modal-trigger','modal-now','modal-closer','history-pusher', 'history-replacer', 'link', 'atarget',
         'page-reloader'],'hooch');
     window.any_time_manager.load();
   };
