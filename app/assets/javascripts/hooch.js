@@ -258,7 +258,7 @@ var initHooch = function(){
         this.$modal_mask.hide()
         this.$modal_content.hide()
         this.enableScroll()
-        this.$modal_content.trigger('modalClosed')
+        this.$modal_wrapper.trigger('modalClosed')
       },
       disableScroll: function(){
         var modal = this
