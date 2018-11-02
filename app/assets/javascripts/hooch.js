@@ -661,7 +661,7 @@ var initHooch = function(){
           if (this.push_state && change_history) {
             var current_query = jQuery.extend(true, {}, hooch.beginning_params);
             current_query = jQuery.extend(true, current_query, history.state);
-            var current_state = new hooch.IhHistoryState(current_query)
+            var current_state = new hooch.HistoryState(current_query)
             current_state.addState(this.tab_group_name, this.push_state);
             history[history_method](current_state.state, null, current_state.toUrl());
           }
@@ -681,7 +681,7 @@ var initHooch = function(){
         this.tab_group.resize();
       }
     }),
-    IhHistoryState: Class.extend({
+    HistoryState: Class.extend({
       init: function(state){
         this.state = jQuery.extend(true, {}, state);
       },
@@ -769,7 +769,7 @@ var initHooch = function(){
       pushIt: function(){
         this.getNewParams()
         var history_pusher = this
-        history_pusher.current_state = new hooch.IhHistoryState(history.state)
+        history_pusher.current_state = new hooch.HistoryState(history.state)
         $.each(this.new_params,function(new_key,new_value){
           history_pusher.current_state.addState(new_key,new_value)
         })
@@ -785,7 +785,7 @@ var initHooch = function(){
         })
       },
       replaceIt: function(){
-        this.current_state = new hooch.IhHistoryState(history.state)
+        this.current_state = new hooch.HistoryState(history.state)
         this.current_state.replacePath(this.new_path)
       }
     }),
@@ -2374,7 +2374,8 @@ var initHooch = function(){
     })
   });
   $(window).bind("popstate", function(e){
-    var previous_state = new hooch.IhHistoryState(e.originalEvent.state)
+    if(e.originalEvent.state.thin_man){return true}
+    var previous_state = new hooch.HistoryState(e.originalEvent.state)
     $.each(previous_state.state, function(key,value){
       var tab_group = hooch.TabGroup.find(key)
       if(tab_group){
