@@ -233,7 +233,7 @@ var initHooch = function(){
         this.attachDismisser()
         this.disableScroll()
         this.$modal_content.trigger('modalInitialized')
-        this.$modal_mask.show()
+        this.showModal()
         hooch.current_modal = this
         this.$modal_content.trigger('modalVisible')
       },
@@ -251,8 +251,15 @@ var initHooch = function(){
       },
       attachDismisser: function(){
         if(this.dismissable){
+          this.$dismisser.show()
           this.$modal_wrapper.append(this.$dismisser)
+        } else {
+          this.$dismisser.hide()
         }
+      },
+      showModal: function(){
+        this.$modal_mask.css({top: $(window).scrollTop()})
+        this.$modal_mask.show()
       },
       close: function(){
         this.$modal_mask.hide()
