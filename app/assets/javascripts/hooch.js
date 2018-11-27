@@ -191,7 +191,7 @@ var initHooch = function(){
         var modal_trigger = this
         $modal_trigger.on('click', function(){
           modal_trigger.instantiate('before')
-          new hooch.Modal(modal_trigger.$modal_content, this.dismissable)
+          new hooch.Modal(modal_trigger.$modal_content, modal_trigger.dismissable)
           modal_trigger.instantiate('after')
         })
       },
