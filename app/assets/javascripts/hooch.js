@@ -492,34 +492,43 @@ var initHooch = function(){
         revealer.reveal();
       },
       reveal: function(){
-        var sanitized_value = this.getSanitizedValue();
-        if('true' == sanitized_value){ sanitized_value = true }
-        if('false' == sanitized_value){ sanitized_value = false }
-        this.$children = [];
-        var revealer = this;
-        this.$all_children.each(function(){
-          var triggers = $(this).data('revealer-triggers');
-          if(triggers){
-            trigger_prototype = typeof(triggers)
-            if(trigger_prototype.toLowerCase() == 'string'){
-              var revelation_triggers = eval('(' + triggers + ')');
+        if(this.revealable()){
+          var sanitized_value = this.getSanitizedValue();
+          if('true' == sanitized_value){ sanitized_value = true }
+          if('false' == sanitized_value){ sanitized_value = false }
+          this.$children = [];
+          var revealer = this;
+          this.$all_children.each(function(){
+            var triggers = $(this).data('revealer-triggers');
+            if(triggers){
+              trigger_prototype = typeof(triggers)
+              if(trigger_prototype.toLowerCase() == 'string'){
+                var revelation_triggers = eval('(' + triggers + ')');
+              } else {
+                revelation_triggers = triggers
+              }
+              if($.inArray(sanitized_value,revelation_triggers) > -1){
+                revealer.$children.push($(this));
+              }
             } else {
-              revelation_triggers = triggers
+              if(sanitized_value == $(this).data('revealer-trigger')){
+                revealer.$children.push($(this));
+              }
             }
-            if($.inArray(sanitized_value,revelation_triggers) > -1){
-              revealer.$children.push($(this));
-            }
-          } else {
-            if(sanitized_value == $(this).data('revealer-trigger')){
-              revealer.$children.push($(this));
-            }
-          }
-        });
-        this.hideChildren();
-        this.revealChosenOnes();
+          });
+          this.hideChildren();
+          this.revealChosenOnes();
+        }
+      },
+      revealable: function(){
+        if(this.$revealer[0].nodeName.toLowerCase() == "input" && this.$revealer.attr('type') == "radio"){
+          return this.$revealer.is(':checked')
+        } else {
+          return true
+        }
       },
       getSanitizedValue: function(){
-        if(this.$revealer[0].nodeName.toLowerCase() == "select"){
+        if((this.$revealer[0].nodeName.toLowerCase() == "select") || (this.$revealer[0].nodeName.toLowerCase() == "input" && this.$revealer.attr('type') == "radio")){
           var sanitized_value = this.$revealer.val();
         } else if(this.$revealer[0].nodeName.toLowerCase() == "input" && this.$revealer.attr('type') == "checkbox"){
           var sanitized_value = this.$revealer.is(':checked');
