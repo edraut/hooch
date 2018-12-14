@@ -268,10 +268,12 @@ var initHooch = function(){
         this.$modal_wrapper.trigger('modalClosed')
       },
       disableScroll: function(){
-        var modal = this
-        modal.old_height = $('body')[0].style.height
-        modal.old_overflow = $('body')[0].style.overflow
-        $('body').css({height: '100%',overflow: 'hidden'})
+        if($(window).width() >= 640){
+          var modal = this
+          modal.old_height = $('body')[0].style.height
+          modal.old_overflow = $('body')[0].style.overflow
+          $('body').css({height: '100%',overflow: 'hidden'})
+        }
       },
       enableScroll: function(){
         $('body').css({height: this.old_height, overflow: this.old_overflow})
