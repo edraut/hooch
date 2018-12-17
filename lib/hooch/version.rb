@@ -1,3 +1,3 @@
 module Hooch
-  VERSION = "0.16.7"
+  VERSION = "0.16.10"
 end

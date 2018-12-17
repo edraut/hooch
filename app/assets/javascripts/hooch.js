@@ -208,11 +208,11 @@ var initHooch = function(){
       }
     }),
     ModalDismisser: Class.extend({
-      init: function($dismisser,modal_mask){
+      init: function($dismisser,modal){
         var dismisser = this
         this.$dismisser = $dismisser;
         hooch.dismisser = this
-        this.modal_mask = modal_mask
+        this.modal = modal
         $dismisser.css({cursor: 'pointer'})
         $dismisser.on('click', function(){
           dismisser.dismissModal()
@@ -220,7 +220,7 @@ var initHooch = function(){
       },
       dismissModal: function(){
         hooch.dismisser = null
-        this.modal_mask.close()
+        this.modal.close()
       }
     }),
     Modal: Class.extend({
@@ -265,6 +265,8 @@ var initHooch = function(){
         this.$modal_mask.hide()
         this.$modal_content.hide()
         this.enableScroll()
+        //TODO remove this after Foundation is gone.
+        $('.reveal-overlay').hide() // HACKITY HACK: this is just to shut Foundation up temporarily until we remove it
         this.$modal_wrapper.trigger('modalClosed')
       },
       disableScroll: function(){
@@ -273,10 +275,16 @@ var initHooch = function(){
           modal.old_height = $('body')[0].style.height
           modal.old_overflow = $('body')[0].style.overflow
           $('body').css({height: '100%',overflow: 'hidden'})
+        } else {
+          $('body').children().not('#hooch-mask').hide()
         }
       },
       enableScroll: function(){
-        $('body').css({height: this.old_height, overflow: this.old_overflow})
+        if($(window).width() >= 640){
+          $('body').css({height: this.old_height, overflow: this.old_overflow})
+        } else {
+          $('body').children().not('#hooch-mask').show()
+        }
       }
     }),
     closeModal: function(){
