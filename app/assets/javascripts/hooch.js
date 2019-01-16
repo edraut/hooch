@@ -549,7 +549,10 @@ var initHooch = function(){
         this.$all_children.hide();
       },
       revealChosenOnes: function(){
-        $.each(this.$children,function(){ $(this).show(); });
+        $.each(this.$children,function(){
+          $(this).show();
+          $(this).trigger('hooch_revealed')
+        });
       },
       bindEvent: function(){
         var revealer = this;
