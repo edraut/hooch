@@ -553,7 +553,7 @@ var initHooch = function(){
       },
       bindEvent: function(){
         var revealer = this;
-        this.$revealer.on('change',function(){
+        this.$revealer.on('change api_changed',function(){
           revealer.reveal();
           return true
         });
