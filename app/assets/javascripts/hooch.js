@@ -2283,7 +2283,7 @@ var initHooch = function(){
     },
     doItNow: function(){
       if(this.doable()) {
-        if(this.target.data('ajax-target')){
+        if(this.target.data('ajax-target') || this.target.data('tab-trigger')){
           this.target.click();
         }else if(this.target.attr('href')){
           if ("_blank" === this.target.attr('target')){
