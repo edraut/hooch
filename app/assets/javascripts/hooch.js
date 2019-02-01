@@ -220,21 +220,33 @@ var initHooch = function(){
       },
       dismissModal: function(){
         hooch.dismisser = null
-        this.modal.close()
+        hooch.current_modal.close()
       }
     }),
     Modal: Class.extend({
       init: function($modal_content,dismissable){
-        this.$modal_content = $modal_content
-        this.dismissable = dismissable
+        if(!hooch.current_modal){
+          hooch.current_modal = new hooch.SingletonModal()
+        }
+        hooch.current_modal.load($modal_content,dismissable)
+      }
+    }),
+    SingletonModal: Class.extend({
+      init: function($modal_content){
         this.getMask()
-        this.getDismisser()
         this.getContentWrapper()
+        this.getDismisser()
+      },
+      load: function($modal_content,dismissable){
+        this.$modal_content = $modal_content
+        this.dismissable = dismissable        
+        this.$modal_wrapper.html(this.$modal_content)
+        this.$modal_wrapper.append(this.$dismisser)
+        this.$modal_content.show()
         this.attachDismisser()
         this.disableScroll()
         this.$modal_content.trigger('modalInitialized')
         this.showModal()
-        hooch.current_modal = this
         this.$modal_content.trigger('modalVisible')
       },
       getMask: function(){
@@ -242,17 +254,14 @@ var initHooch = function(){
       },
       getContentWrapper: function(){
         this.$modal_wrapper = this.$modal_mask.find('#hooch-modal')
-        this.$modal_wrapper.html(this.$modal_content)
-        this.$modal_content.show()
       },
       getDismisser: function(){
-        this.$dismisser = this.$modal_mask.find('#hooch-dismiss')        
-        this.dismisser = new hooch.ModalDismisser(this.$dismisser,this)
+        this.$dismisser = this.$modal_mask.find('#hooch-dismiss')
+        this.$dismisser.on('click', function(){hooch.current_modal.close()})
       },
       attachDismisser: function(){
         if(this.dismissable){
           this.$dismisser.show()
-          this.$modal_wrapper.append(this.$dismisser)
         } else {
           this.$dismisser.hide()
         }
@@ -262,6 +271,7 @@ var initHooch = function(){
         this.$modal_mask.show()
       },
       close: function(){
+        this.$dismisser.detach()
         this.$modal_mask.hide()
         this.$modal_content.hide()
         this.enableScroll()
@@ -288,8 +298,8 @@ var initHooch = function(){
       }
     }),
     closeModal: function(){
-      if(hooch.dismisser){
-        hooch.dismisser.dismissModal()
+      if(hooch.current_modal){
+        hooch.current_modal.close()
       }
     },
     attachModalDismisser: function(){
