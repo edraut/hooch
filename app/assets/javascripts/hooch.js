@@ -257,10 +257,11 @@ var initHooch = function(){
       },
       getDismisser: function(){
         this.$dismisser = this.$modal_mask.find('#hooch-dismiss')
-        this.$dismisser.on('click', function(){hooch.current_modal.close()})
       },
       attachDismisser: function(){
         if(this.dismissable){
+          this.$dismisser.off('click')
+          this.$dismisser.on('click', function(){hooch.current_modal.close()})
           this.$dismisser.show()
         } else {
           this.$dismisser.hide()
