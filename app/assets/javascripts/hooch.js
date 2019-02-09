@@ -240,14 +240,18 @@ var initHooch = function(){
       load: function($modal_content,dismissable){
         this.$modal_content = $modal_content
         this.dismissable = dismissable        
-        this.$modal_wrapper.html(this.$modal_content)
-        this.$modal_wrapper.append(this.$dismisser)
-        this.$modal_content.show()
+        this.arrangeContent()
         this.attachDismisser()
         this.disableScroll()
         this.$modal_content.trigger('modalInitialized')
         this.showModal()
         this.$modal_content.trigger('modalVisible')
+      },
+      arrangeContent: function(){
+        this.$modal_wrapper.html(this.$modal_content)
+        this.$modal_wrapper.append(this.$dismisser)
+        this.$modal_wrapper.css({'max-height': window.innerHeight - 100})
+        this.$modal_content.show()
       },
       getMask: function(){
         this.$modal_mask = $('#hooch-mask')
